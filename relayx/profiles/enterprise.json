@@ -1,0 +1,14 @@
+{
+  "name": "enterprise",
+  "description": "Enterprise reporting profile with medium OPSEC noise ceiling and SIEM-friendly output defaults.",
+  "timeout": 3.0,
+  "workers": 24,
+  "max_noise": "medium",
+  "challenge_flow": true,
+  "mssql_tls": true,
+  "auth_validation": false,
+  "strict_scope": true,
+  "report_format": "html",
+  "export_format": "opengraph",
+  "module_manifests": "fixtures/execution_modules"
+}

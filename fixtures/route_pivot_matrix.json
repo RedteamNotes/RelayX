@@ -1,0 +1,155 @@
+{
+  "name": "RelayX route and pivot awareness matrix",
+  "version": 1,
+  "commands": [
+    "routes",
+    "scan"
+  ],
+  "source_profile_fields": [
+    "session",
+    "segment",
+    "subnets",
+    "routes",
+    "route_hops"
+  ],
+  "route_states": [
+    "direct",
+    "routed",
+    "metadata_only",
+    "assumed_reachable",
+    "unreachable",
+    "source_out_of_scope",
+    "target_out_of_scope"
+  ],
+  "pivot_types": [
+    "direct",
+    "ligolo",
+    "sliver_p2p",
+    "socks",
+    "tun2socks",
+    "portfwd",
+    "ssh",
+    "vpn",
+    "unknown"
+  ],
+  "evidence_contract": [
+    "source_session",
+    "source_segment",
+    "source_subnets",
+    "source_routes",
+    "route_reachable",
+    "route_reachability_state",
+    "route_hop_count",
+    "route_pivot_types",
+    "route_risk_score",
+    "route_risk_level",
+    "route_noise_level"
+  ],
+  "reachability_check_contract": [
+    "authorized_direct_tcp_connect",
+    "tcp_connect_check",
+    "operation_control",
+    "expected_telemetry",
+    "rollback",
+    "pivot_session_not_opened"
+  ],
+  "scenarios": [
+    {
+      "id": "ROUTE-DIRECT-CIDR",
+      "source": {
+        "host": "ws01",
+        "subnets": [
+          "10.20.0.0/16"
+        ]
+      },
+      "target": "10.20.1.10",
+      "expected_state": "direct",
+      "expected_reachable": true
+    },
+    {
+      "id": "ROUTE-LIGOLO-CIDR",
+      "source": {
+        "host": "ws01",
+        "route_hops": [
+          {
+            "kind": "ligolo",
+            "networks": [
+              "10.30.0.0/16"
+            ]
+          }
+        ]
+      },
+      "target": "10.30.2.5",
+      "expected_state": "routed",
+      "expected_reachable": true
+    },
+    {
+      "id": "ROUTE-METADATA-ONLY",
+      "source": {
+        "host": "ws01",
+        "routes": [
+          "ligolo:ws01"
+        ]
+      },
+      "target": "ca01.redteamnotes.com",
+      "expected_state": "metadata_only",
+      "expected_reachable": true,
+      "expected_confidence": "low"
+    },
+    {
+      "id": "ROUTE-UNREACHABLE",
+      "source": {
+        "host": "ws01",
+        "route_hops": [
+          {
+            "kind": "ligolo",
+            "networks": [
+              "10.30.0.0/16"
+            ]
+          }
+        ]
+      },
+      "target": "10.40.2.5",
+      "expected_state": "unreachable",
+      "expected_reachable": false
+    },
+    {
+      "id": "ROUTE-DEEP-PIVOT-RISK",
+      "source": {
+        "host": "ws01",
+        "route_hops": [
+          {
+            "kind": "ligolo",
+            "networks": [
+              "10.10.0.0/16"
+            ]
+          },
+          {
+            "kind": "socks",
+            "networks": [
+              "10.20.0.0/16"
+            ],
+            "requires_listener": true,
+            "risk": "high"
+          }
+        ]
+      },
+      "target": "10.20.2.5",
+      "expected_state": "routed",
+      "expected_risk_minimum": "high"
+    },
+    {
+      "id": "ROUTE-AUTHORIZED-DIRECT-TCP-CHECK",
+      "source": {
+        "host": "ws01",
+        "subnets": [
+          "10.20.0.0/16"
+        ]
+      },
+      "target": "10.20.2.5",
+      "connect_check": true,
+      "expected_method": "authorized_direct_tcp_connect",
+      "forbidden_action": "pivot_session_open"
+    }
+  ]
+}

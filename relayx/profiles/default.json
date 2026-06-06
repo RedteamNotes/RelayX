@@ -1,0 +1,13 @@
+{
+  "name": "default",
+  "description": "Low-noise RelayX readiness defaults for authorized assessments.",
+  "timeout": 3.0,
+  "workers": 16,
+  "max_noise": "high",
+  "challenge_flow": true,
+  "mssql_tls": true,
+  "auth_validation": false,
+  "strict_scope": false,
+  "report_format": "markdown",
+  "export_format": "jsonl"
+}

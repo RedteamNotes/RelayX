@@ -1,0 +1,100 @@
+{
+  "name": "RelayX active validation harness matrix",
+  "version": 1,
+  "modes": [
+    "dry-run",
+    "armed",
+    "confirmed"
+  ],
+  "guardrails": [
+    "mode",
+    "path_status",
+    "timebox",
+    "noise_budget",
+    "source_trigger_boundary",
+    "scope_target",
+    "scope_source",
+    "confirm_flag",
+    "operator",
+    "reason",
+    "audit_log",
+    "auth_validation_requires_confirmed_reprobe",
+    "operation_rate_limit",
+    "operation_window",
+    "machine_output_clean"
+  ],
+  "actions": [
+    "target_reprobe"
+  ],
+  "boundaries": [
+    "no_source_side_webclient_trigger",
+    "no_rpc_coercion",
+    "no_mssql_outbound_trigger",
+    "no_name_resolution_change",
+    "no_credential_relay"
+  ],
+  "scenarios": [
+    {
+      "id": "VALIDATION-DRY-RUN",
+      "mode": "dry-run",
+      "expected_result": "dry_run",
+      "network_action": false
+    },
+    {
+      "id": "VALIDATION-ARMED",
+      "mode": "armed",
+      "expected_result": "armed",
+      "network_action": false
+    },
+    {
+      "id": "VALIDATION-CONFIRMED-NOOP",
+      "mode": "confirmed",
+      "requires": [
+        "confirm_flag",
+        "operator",
+        "reason",
+        "audit_log"
+      ],
+      "expected_result": "confirmed_noop",
+      "network_action": false
+    },
+    {
+      "id": "VALIDATION-CONFIRMED-REPROBE",
+      "mode": "confirmed",
+      "requires": [
+        "confirm_flag",
+        "operator",
+        "reason",
+        "audit_log",
+        "reprobe"
+      ],
+      "expected_action": "target_reprobe",
+      "network_action": "target_only"
+    },
+    {
+      "id": "VALIDATION-AUTH-VALIDATION-GATE",
+      "mode": "armed",
+      "auth_validation": true,
+      "expected_guardrail_failure": "auth_validation_requires_confirmed_reprobe"
+    },
+    {
+      "id": "VALIDATION-CONFIRMED-REPROBE-EXPIRED-WINDOW",
+      "mode": "confirmed",
+      "reprobe": true,
+      "operation_control": {
+        "stop_before": "2000-01-01T00:00:00+00:00"
+      },
+      "expected_guardrail_failure": "operation_window",
+      "network_action": false
+    },
+    {
+      "id": "VALIDATION-DRY-RUN-EXPIRED-WINDOW-WARN",
+      "mode": "dry-run",
+      "operation_control": {
+        "stop_before": "2000-01-01T00:00:00+00:00"
+      },
+      "expected_guardrail_warning": "operation_window",
+      "network_action": false
+    }
+  ]
+}

@@ -1,0 +1,205 @@
+{
+  "name": "RelayX protocol validation matrix",
+  "version": 1,
+  "evidence_contract": {
+    "smb": [
+      "smb_signing_required",
+      "smb_security_mode"
+    ],
+    "http": [
+      "http_status",
+      "www_authenticate",
+      "ntlm_type2_challenge",
+      "ntlm_authenticate_validation",
+      "relayx_response_classification",
+      "relayx_response_subclassification",
+      "relayx_policy_inference",
+      "relayx_oracle_signature",
+      "relayx_oracle_observations",
+      "relayx_remaining_uncertainty",
+      "epa_status"
+    ],
+    "ldap": [
+      "ldap_reachable",
+      "rootdse_supported_sasl_mechanisms",
+      "ldap_sasl_ntlm_type2_challenge",
+      "ldap_ntlm_authenticate_validation",
+      "relayx_response_classification",
+      "relayx_response_subclassification",
+      "relayx_policy_inference",
+      "relayx_oracle_signature",
+      "relayx_oracle_observations",
+      "relayx_remaining_uncertainty",
+      "ldap_bind_result_code"
+    ],
+    "ldaps": [
+      "ldaps_reachable",
+      "rootdse_supported_sasl_mechanisms",
+      "ldap_sasl_ntlm_type2_challenge",
+      "ldap_ntlm_authenticate_validation",
+      "relayx_response_classification",
+      "relayx_response_subclassification",
+      "relayx_policy_inference",
+      "relayx_oracle_signature",
+      "relayx_oracle_observations",
+      "relayx_remaining_uncertainty",
+      "ldap_bind_result_code",
+      "tls_certificate_sha256"
+    ],
+    "mssql": [
+      "tds_prelogin_encryption",
+      "tds_wrapped_tls",
+      "mssql_cbt_tls_server_end_point",
+      "mssql_sspi_ntlm_type2_challenge",
+      "mssql_ntlm_authenticate_validation",
+      "relayx_response_classification",
+      "relayx_response_subclassification",
+      "relayx_policy_inference",
+      "relayx_oracle_signature",
+      "relayx_oracle_observations",
+      "relayx_remaining_uncertainty",
+      "tds_loginack_observed",
+      "tds_errors",
+      "mssql_epa_enforcement"
+    ]
+  },
+  "classification_states": [
+    "not_performed",
+    "synthetic_auth_rejected",
+    "possible_cbt_enforcement",
+    "possible_epa_cbt_enforcement",
+    "stronger_auth_or_confidentiality_required",
+    "unexpected_acceptance",
+    "inconclusive"
+  ],
+  "subclassification_states": [
+    "auth_validation_not_performed",
+    "transport_or_protocol_error",
+    "synthetic_auth_unexpectedly_accepted",
+    "invalid_credentials_no_binding_signal",
+    "invalid_credentials_with_cbt_no_epa_signal",
+    "invalid_credentials_with_cbt_no_cbt_signal",
+    "epa_or_cbt_rejection_signal",
+    "cbt_binding_rejected",
+    "epa_cbt_binding_rejected",
+    "stronger_auth_or_confidentiality_required",
+    "tls_or_cbt_unavailable",
+    "unmapped_http_response",
+    "unmapped_ldap_result",
+    "unmapped_mssql_token_stream"
+  ],
+  "scenarios": [
+    {
+      "id": "SMB-01",
+      "service": "smb",
+      "policy": "signing_not_required",
+      "expected": {
+        "smb_signing_required": false,
+        "path_status": "candidate"
+      }
+    },
+    {
+      "id": "SMB-02",
+      "service": "smb",
+      "policy": "signing_required",
+      "expected": {
+        "smb_signing_required": true,
+        "path_status": "blocked"
+      }
+    },
+    {
+      "id": "LDAP-01",
+      "service": "ldap",
+      "policy": "ldap_signing_not_required",
+      "mode": "default",
+      "expected": {
+        "relayx_response_classification": "not_performed"
+      }
+    },
+    {
+      "id": "LDAP-02",
+      "service": "ldap",
+      "policy": "ldap_signing_required",
+      "mode": "auth_validation",
+      "expected_any_classification": [
+        "stronger_auth_or_confidentiality_required",
+        "synthetic_auth_rejected",
+        "inconclusive"
+      ]
+    },
+    {
+      "id": "LDAPS-01",
+      "service": "ldaps",
+      "policy": "channel_binding_never",
+      "mode": "auth_validation",
+      "expected": {
+        "tls_certificate_sha256": "observed_when_reachable",
+        "relayx_response_classification": "synthetic_auth_rejected"
+      }
+    },
+    {
+      "id": "LDAPS-03",
+      "service": "ldaps",
+      "policy": "channel_binding_always",
+      "mode": "auth_validation",
+      "expected_any_classification": [
+        "possible_cbt_enforcement",
+        "synthetic_auth_rejected",
+        "inconclusive"
+      ]
+    },
+    {
+      "id": "HTTP-01",
+      "service": "http",
+      "policy": "iis_epa_disabled",
+      "mode": "auth_validation",
+      "expected": {
+        "ntlm_type2_challenge": true,
+        "relayx_response_classification": "synthetic_auth_rejected"
+      }
+    },
+    {
+      "id": "HTTP-03",
+      "service": "https",
+      "policy": "iis_epa_required",
+      "mode": "auth_validation",
+      "expected_any_classification": [
+        "possible_epa_cbt_enforcement",
+        "synthetic_auth_rejected",
+        "inconclusive"
+      ]
+    },
+    {
+      "id": "MSSQL-02",
+      "service": "mssql",
+      "policy": "encrypt_on_epa_disabled",
+      "mode": "default",
+      "expected": {
+        "tds_wrapped_tls": true,
+        "mssql_cbt_tls_server_end_point": "observed_when_tls_completes",
+        "relayx_response_classification": "not_performed"
+      }
+    },
+    {
+      "id": "MSSQL-03",
+      "service": "mssql",
+      "policy": "encrypt_required_epa_required",
+      "mode": "auth_validation",
+      "expected_any_classification": [
+        "possible_epa_cbt_enforcement",
+        "synthetic_auth_rejected",
+        "inconclusive"
+      ]
+    },
+    {
+      "id": "MSSQL-04",
+      "service": "mssql",
+      "policy": "encrypt_not_supported",
+      "mode": "default",
+      "expected": {
+        "tds_wrapped_tls": false,
+        "mssql_cbt_tls_server_end_point": ""
+      }
+    }
+  ]
+}

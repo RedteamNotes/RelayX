@@ -1,0 +1,4 @@
+host,webclient,spooler,efsrpc,dfsnm,fsrvp,mssql_outbound,adidns,ghost_spn,routes,tags,noise_limit,notes
+ws01.lab.local,true,false,false,false,false,false,false,false,ligolo:corp-workstations,workstation,medium,WebClient candidate from asset inventory
+sql01.lab.local,false,false,false,false,false,true,false,false,ligolo:server-vlan,sql-server,high,SQL outbound auth candidate only after approval
+dc01.lab.local,false,false,false,false,false,false,true,true,ligolo:dc-segment,domain-controller,medium,Name-control modeling requires rollback plan

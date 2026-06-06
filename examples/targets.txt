@@ -1,0 +1,4 @@
+# RelayX target list example.
+# Replace these with explicitly authorized assessment targets.
+127.0.0.1
+

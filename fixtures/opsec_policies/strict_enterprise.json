@@ -1,0 +1,34 @@
+{
+  "name": "strict_enterprise_fixture",
+  "description": "Fixture OPSEC policy for enterprise exercises with explicit scope and medium noise ceiling.",
+  "max_noise": "medium",
+  "max_timebox_seconds": 300,
+  "require_scope_for_armed": true,
+  "require_scope_for_confirmed": true,
+  "require_scope_for_source_plan": true,
+  "require_scope_for_connect_check": true,
+  "require_scope_for_listener": true,
+  "require_scope_for_callback": true,
+  "require_confirm_for_confirmed": true,
+  "require_operator_for_confirmed": true,
+  "require_reason_for_confirmed": true,
+  "require_audit_for_confirmed": true,
+  "allow_auth_validation": true,
+  "require_reprobe_for_auth_validation": true,
+  "allow_source_trigger_execution": false,
+  "allow_credential_capture": false,
+  "allow_credential_forwarding": false,
+  "allow_listener": false,
+  "allowed_network_actions": [
+    "none",
+    "target_reprobe",
+    "tcp_connect_check",
+    "offline_audit_record"
+  ],
+  "blocked_source_capabilities": [
+    "name_resolution"
+  ],
+  "notes": [
+    "Used by RelayX tests to verify OPSEC policy loading and blocking behavior."
+  ]
+}

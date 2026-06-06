@@ -1,0 +1,301 @@
+{
+  "metadata": {
+    "tool": "RelayX",
+    "version": "0.5.4",
+    "schema_version": 1,
+    "mode": "lab_signature_corpus",
+    "captured_at": "2026-06-05T00:00:00+00:00",
+    "label": "http-iis-epa-policy-matrix",
+    "environment": "fixture-windows-server-iis",
+    "policy_state": "mixed_http_iis_epa_matrix",
+    "source_result_version": "0.5.4",
+    "active_probe": true,
+    "finding_count": 3
+  },
+  "opsec": {
+    "network_actions_recorded": true,
+    "notes": [
+      "Synthetic lab fixture for corpus pipeline tests; replace with environment-specific captures before promotion decisions."
+    ],
+    "limitations": [
+      "HTTP EPA Off and Accept can be indistinguishable with invalid credentials unless a no-CBT baseline is compared.",
+      "Endpoint modules may alter HTTP status codes and response wording."
+    ]
+  },
+  "captures": [
+    {
+      "finding_ref": "F-0001",
+      "host": "iis01.lab.redteamnotes.com",
+      "port": 80,
+      "protocol": "http",
+      "finding_name": "iis_ntlm",
+      "target_family": "http_iis_epa",
+      "status": "candidate",
+      "confidence": "medium",
+      "observed_signature": {
+        "target_family": "http_iis_epa",
+        "protocol": "http",
+        "finding_name": "iis_ntlm",
+        "response_classification": "synthetic_auth_rejected",
+        "auth_validation_observed": true,
+        "http_status": 401,
+        "http_auth_status": 401,
+        "cbt_hash_observed": false
+      },
+      "expected": {
+        "policy_state": "epa_off",
+        "classification": "synthetic_auth_rejected",
+        "calibrated_state": "expected_invalid_credentials_no_epa_signal",
+        "confidence": "medium",
+        "promotion": "retain",
+        "promotion_reason": "Ordinary invalid-credential rejection without CBT evidence or EPA wording.",
+        "remaining_uncertainty": [
+          "This does not prove EPA is disabled; it only separates ordinary rejection from EPA-specific diagnostics."
+        ]
+      },
+      "raw_evidence": [
+        {
+          "type": "observed",
+          "key": "ntlm_authenticate_validation",
+          "value": true,
+          "confidence": "medium",
+          "detail": "Synthetic NTLM Authenticate was rejected with ordinary HTTP authentication semantics.",
+          "raw": {
+            "sent": true,
+            "status_code": 401,
+            "reason": "Unauthorized",
+            "cbt_hash": ""
+          }
+        },
+        {
+          "type": "inferred",
+          "key": "relayx_response_classification",
+          "value": "synthetic_auth_rejected",
+          "confidence": "medium",
+          "detail": "No EPA-specific response marker was observed.",
+          "raw": {}
+        }
+      ],
+      "review": {
+        "status": "fixture_only",
+        "promotion_decision": "retain",
+        "reviewed_by": "RedteamNotes",
+        "reviewed_at": "2026-06-05T00:00:00+00:00",
+        "reason": "Synthetic fixture expectation is retained for matrix tests and is not approved as real lab promotion evidence.",
+        "limitations": [
+          "Synthetic fixture only.",
+          "Collect authorized repeated lab captures and operator review before promotion."
+        ]
+      }
+    },
+    {
+      "finding_ref": "F-0002",
+      "host": "iis02.lab.redteamnotes.com",
+      "port": 443,
+      "protocol": "https",
+      "finding_name": "iis_ntlm",
+      "target_family": "http_iis_epa",
+      "status": "candidate",
+      "confidence": "medium",
+      "observed_signature": {
+        "target_family": "http_iis_epa",
+        "protocol": "https",
+        "finding_name": "iis_ntlm",
+        "response_classification": "synthetic_auth_rejected",
+        "auth_validation_observed": true,
+        "http_status": 401,
+        "http_auth_status": 401,
+        "tls_certificate_observed": true,
+        "cbt_hash_observed": true
+      },
+      "expected": {
+        "policy_state": "epa_accept_with_cbt",
+        "classification": "synthetic_auth_rejected",
+        "calibrated_state": "invalid_credentials_with_cbt_evidence_no_epa_signal",
+        "confidence": "medium",
+        "promotion": "retain",
+        "promotion_reason": "CBT evidence was available, but the response did not carry an EPA-specific diagnostic.",
+        "remaining_uncertainty": [
+          "EPA Accept and disabled modes may both reject invalid credentials without distinguishable wording."
+        ]
+      },
+      "raw_evidence": [
+        {
+          "type": "observed",
+          "key": "tls_certificate_sha256",
+          "value": "fixture-http-iis-accept-cert",
+          "confidence": "medium",
+          "detail": "Fixture TLS certificate marker.",
+          "raw": {}
+        },
+        {
+          "type": "observed",
+          "key": "ntlm_authenticate_validation",
+          "value": true,
+          "confidence": "medium",
+          "detail": "Synthetic NTLM Authenticate was rejected with CBT input available.",
+          "raw": {
+            "sent": true,
+            "status_code": 401,
+            "reason": "Unauthorized",
+            "cbt_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "type": "inferred",
+          "key": "relayx_response_classification",
+          "value": "synthetic_auth_rejected",
+          "confidence": "medium",
+          "detail": "No EPA-specific response marker was observed.",
+          "raw": {}
+        }
+      ],
+      "review": {
+        "status": "fixture_only",
+        "promotion_decision": "retain",
+        "reviewed_by": "RedteamNotes",
+        "reviewed_at": "2026-06-05T00:00:00+00:00",
+        "reason": "Synthetic fixture expectation is retained for matrix tests and is not approved as real lab promotion evidence.",
+        "limitations": [
+          "Synthetic fixture only.",
+          "Collect authorized repeated lab captures and operator review before promotion."
+        ]
+      }
+    },
+    {
+      "finding_ref": "F-0003",
+      "host": "iis03.lab.redteamnotes.com",
+      "port": 443,
+      "protocol": "https",
+      "finding_name": "iis_ntlm",
+      "target_family": "http_iis_epa",
+      "status": "candidate",
+      "confidence": "medium",
+      "observed_signature": {
+        "target_family": "http_iis_epa",
+        "protocol": "https",
+        "finding_name": "iis_ntlm",
+        "response_classification": "possible_epa_cbt_enforcement",
+        "auth_validation_observed": true,
+        "http_status": 401,
+        "http_auth_status": 401,
+        "tls_certificate_observed": true,
+        "cbt_hash_observed": true,
+        "response_keywords": [
+          "channel_binding",
+          "extended_protection"
+        ]
+      },
+      "expected": {
+        "policy_state": "epa_required",
+        "classification": "possible_epa_cbt_enforcement",
+        "calibrated_state": "epa_or_cbt_enforcement_signal",
+        "confidence": "medium",
+        "promotion": "promote",
+        "promotion_reason": "HTTP response carried stable EPA/CBT-specific wording under the required policy state.",
+        "remaining_uncertainty": [
+          "Promotion still depends on matching server build and endpoint behavior in the operator lab."
+        ]
+      },
+      "raw_evidence": [
+        {
+          "type": "observed",
+          "key": "tls_certificate_sha256",
+          "value": "fixture-http-iis-required-cert",
+          "confidence": "medium",
+          "detail": "Fixture TLS certificate marker.",
+          "raw": {}
+        },
+        {
+          "type": "observed",
+          "key": "ntlm_authenticate_validation",
+          "value": true,
+          "confidence": "medium",
+          "detail": "Synthetic NTLM Authenticate produced an EPA diagnostic.",
+          "raw": {
+            "sent": true,
+            "status_code": 401,
+            "reason": "Extended Protection required",
+            "www_authenticate": "NTLM channel binding required",
+            "cbt_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "type": "inferred",
+          "key": "relayx_response_classification",
+          "value": "possible_epa_cbt_enforcement",
+          "confidence": "medium",
+          "detail": "EPA or CBT diagnostic wording was observed.",
+          "raw": {}
+        }
+      ],
+      "review": {
+        "status": "fixture_only",
+        "promotion_decision": "not_for_promotion",
+        "reviewed_by": "RedteamNotes",
+        "reviewed_at": "2026-06-05T00:00:00+00:00",
+        "reason": "Synthetic fixture expectation is retained for matrix tests and is not approved as real lab promotion evidence.",
+        "limitations": [
+          "Synthetic fixture only.",
+          "Collect authorized repeated lab captures and operator review before promotion."
+        ]
+      }
+    }
+  ],
+  "provenance": {
+    "corpus_kind": "synthetic_fixture",
+    "data_origin": "synthetic",
+    "capture_source": "relayx_fixture",
+    "capture_method": "offline synthetic fixture corpus",
+    "authorization_ref": "fixture-only",
+    "operator": "redpen",
+    "review_status": "fixture_only",
+    "reviewed_by": "RedteamNotes",
+    "reviewed_at": "2026-06-05T00:00:00+00:00",
+    "review_reason": "Synthetic fixture for pipeline, schema, stability, and differential tests; not real lab promotion evidence."
+  },
+  "endpoint_build": {
+    "platform": "Windows Server synthetic fixture",
+    "server_role": "IIS",
+    "os_version": "fixture",
+    "product": "Microsoft IIS",
+    "product_version": "fixture",
+    "policy_matrix": "HTTP/IIS EPA off/accept/require",
+    "authentication_provider": "NTLM fixture",
+    "notes": [
+      "Synthetic endpoint build metadata keeps fixture structure explicit.",
+      "Replace with real OS, product, patch, provider order, and policy metadata for authorized lab captures."
+    ]
+  },
+  "drift_baseline": {
+    "baseline_id": "fixture-http-iis-epa",
+    "minimum_repeated_captures": 1,
+    "stable_required_keys": [
+      "response_classification",
+      "response_subclassification",
+      "policy_inference",
+      "oracle_signature",
+      "http_auth_status",
+      "ldap_result_code",
+      "ldap_diagnostic_contains_80090346",
+      "mssql_errors",
+      "mssql_loginack",
+      "tds_prelogin_encryption",
+      "tds_wrapped_tls",
+      "tls_certificate_observed",
+      "cbt_hash_observed",
+      "response_keywords"
+    ],
+    "known_unstable_keys": [
+      "target_family",
+      "protocol",
+      "finding_name",
+      "http_status",
+      "auth_validation_observed"
+    ],
+    "notes": [
+      "Synthetic fixture baseline uses one canonical capture per policy state for test determinism.",
+      "Real lab corpuses should raise minimum_repeated_captures and keep repeated raw signatures."
+    ]
+  }
+}

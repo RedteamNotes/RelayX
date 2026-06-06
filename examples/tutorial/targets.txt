@@ -1,0 +1,6 @@
+# Offline tutorial target inventory.
+# These hostnames are documentation fixtures, not live targets.
+filesrv01.redteamnotes.com
+dc01.redteamnotes.com
+ca01.redteamnotes.com
+sql01.redteamnotes.com

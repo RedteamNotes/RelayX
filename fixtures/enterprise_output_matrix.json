@@ -1,0 +1,284 @@
+{
+  "name": "RelayX enterprise output and release matrix",
+  "version": 1,
+  "commands": [
+    "export",
+    "bundle",
+    "diff",
+    "simulate-fixes",
+    "quality-gate",
+    "profiles",
+    "modules",
+    "module-plan",
+    "report",
+    "schema",
+    "lab-provenance",
+    "console",
+    "completion"
+  ],
+  "export_formats": [
+    "opengraph",
+    "jsonl",
+    "csv",
+    "json",
+    "html",
+    "mermaid",
+    "markdown"
+  ],
+  "opengraph_contract": {
+    "field_contract_version": 1,
+    "top_level": [
+      "metadata",
+      "mapping",
+      "graph"
+    ],
+    "graph_fields": [
+      "nodes",
+      "edges"
+    ],
+    "custom_kinds": [
+      "RelayXScan",
+      "RelayXSource",
+      "RelayXTarget",
+      "RelayXTargetService",
+      "RelayXFinding",
+      "RelayXPath",
+      "RelayXControl"
+    ],
+    "custom_edges": [
+      "RelayXIncludesSource",
+      "RelayXIncludesTarget",
+      "RelayXHasFinding",
+      "RelayXIncludesPath",
+      "RelayXPathSource",
+      "RelayXPathTarget",
+      "RelayXCandidateRelay",
+      "RelayXPathMitigatedBy"
+    ]
+  },
+  "html_report_filters": [
+    "status",
+    "severity",
+    "protocol",
+    "source_capability",
+    "target_family",
+    "defensive_control",
+    "free_text"
+  ],
+  "csv_field_contract": [
+    "record_type",
+    "id",
+    "host",
+    "port",
+    "protocol",
+    "status",
+    "score",
+    "impact",
+    "confidence",
+    "source",
+    "transport",
+    "target",
+    "target_service",
+    "rule_id",
+    "decision",
+    "target_family",
+    "source_capability",
+    "control_keys",
+    "control_labels",
+    "route_state",
+    "route_risk_level",
+    "route_risk_score",
+    "summary",
+    "blockers",
+    "fixes",
+    "remaining_uncertainty",
+    "field_contract_version"
+  ],
+  "jsonl_event_types": [
+    "relayx.scan",
+    "relayx.source",
+    "relayx.finding",
+    "relayx.path",
+    "relayx.control"
+  ],
+  "bundle_contract": {
+    "manifest": "manifest.json",
+    "artifacts": [
+      "relayx-result.json",
+      "relayx-opengraph.json",
+      "relayx-events.jsonl",
+      "relayx.csv",
+      "relayx-report.html",
+      "relayx-report.md",
+      "relayx-paths.mmd",
+      "relayx-routes.json"
+    ],
+    "required_artifact_fields": [
+      "path",
+      "format",
+      "schema_kind",
+      "valid",
+      "errors",
+      "warnings",
+      "bytes",
+      "sha256"
+    ]
+  },
+  "quality_gate_contract": {
+    "command": "quality-gate",
+    "exit_code_on_failure": 2,
+    "checks": [
+      "package.metadata",
+      "version.consistency",
+      "quality_gate.contract",
+      "cli.help_registry",
+      "cli.short_options",
+      "cli.short_options.docs",
+      "cli.console_contract",
+      "cli.completion_contract",
+      "docs.cli_sync",
+      "schema.catalog",
+      "fixtures.json",
+      "fixtures.evidence_report",
+      "fixtures.lab_profiles",
+      "fixtures.lab_corpus",
+      "fixtures.lab_matrix",
+      "fixtures.lab_determinism",
+      "fixtures.lab_provenance",
+      "fixtures.lab_stability",
+      "fixtures.lab_differential",
+      "fixtures.execution_modules",
+      "fixtures.opsec_policies",
+      "enterprise.matrix",
+      "docs.enterprise_ci",
+      "docs.integration_tests",
+      "tutorial.examples",
+      "ci.workflows"
+    ]
+  },
+  "short_option_contract": {
+    "global": [
+      "-V/--version",
+      "-q/--no-banner"
+    ],
+    "common": [
+      "-f/--format",
+      "-o/--out",
+      "-r/--result",
+      "-s/--sources",
+      "-t/--targets",
+      "-S/--scope"
+    ],
+    "safety_sensitive": [
+      "-A/--auth-validation",
+      "-y/--confirm",
+      "-O/--operator",
+      "-R/--reason",
+      "-A/--audit-log",
+      "-P/--opsec-policy"
+    ]
+  },
+  "diff_states": [
+    "added_paths",
+    "removed_paths",
+    "changed_paths",
+    "added_findings",
+    "removed_findings",
+    "control_trends",
+    "remediation_regressions",
+    "remediation_improvements"
+  ],
+  "simulation_inputs": [
+    "fix_text",
+    "control_key"
+  ],
+  "simulation_outputs": [
+    "control_dependencies",
+    "residual_exposure",
+    "remaining_control_keys",
+    "remaining_target_families"
+  ],
+  "profiles": [
+    "default",
+    "enterprise"
+  ],
+  "docs": [
+    "README.md",
+    "docs/README.zh-CN.md",
+    "docs/README.fr.md",
+    "docs/ENTERPRISE_OUTPUTS.md",
+    "docs/INSTALL.md"
+  ],
+  "release": {
+    "version": "0.5.4",
+    "console_script": "relayx",
+    "pipx_installable": true
+  },
+  "scenarios": [
+    {
+      "id": "ENTERPRISE-BUNDLE",
+      "command": "bundle",
+      "expected_manifest": "manifest.json",
+      "expected_schema": "bundle-manifest"
+    },
+    {
+      "id": "ENTERPRISE-QUALITY-GATE",
+      "command": "quality-gate",
+      "expected_schema": "quality-gate",
+      "expected_status": "pass"
+    },
+    {
+      "id": "ENTERPRISE-EXPORT-OPENGRAPH",
+      "command": "export",
+      "format": "opengraph",
+      "expected_top_level": [
+        "metadata",
+        "mapping",
+        "graph"
+      ]
+    },
+    {
+      "id": "ENTERPRISE-REPORT-HTML-FILTERS",
+      "command": "report",
+      "format": "html",
+      "expected_filters": [
+        "status",
+        "severity",
+        "protocol",
+        "source_capability",
+        "target_family",
+        "defensive_control"
+      ]
+    },
+    {
+      "id": "ENTERPRISE-EXPORT-JSONL",
+      "command": "export",
+      "format": "jsonl",
+      "expected_event": "relayx.path"
+    },
+    {
+      "id": "ENTERPRISE-DIFF",
+      "command": "diff",
+      "expected_sections": [
+        "added_paths",
+        "removed_paths",
+        "changed_paths",
+        "control_trends",
+        "remediation_regressions"
+      ]
+    },
+    {
+      "id": "ENTERPRISE-SIMULATE-FIXES",
+      "command": "simulate-fixes",
+      "expected_metric": "score_reduction"
+    },
+    {
+      "id": "ENTERPRISE-PROFILES",
+      "command": "profiles",
+      "expected_profiles": [
+        "default",
+        "enterprise"
+      ]
+    }
+  ]
+}

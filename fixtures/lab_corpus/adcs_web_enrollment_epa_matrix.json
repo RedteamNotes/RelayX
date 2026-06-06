@@ -1,0 +1,227 @@
+{
+  "metadata": {
+    "tool": "RelayX",
+    "version": "0.5.4",
+    "schema_version": 1,
+    "mode": "lab_signature_corpus",
+    "captured_at": "2026-06-05T00:00:00+00:00",
+    "label": "adcs-web-enrollment-epa-policy-matrix",
+    "environment": "fixture-windows-server-adcs-iis",
+    "policy_state": "mixed_adcs_epa_matrix",
+    "source_result_version": "0.5.4",
+    "active_probe": true,
+    "finding_count": 2
+  },
+  "opsec": {
+    "network_actions_recorded": true,
+    "notes": [
+      "Synthetic AD CS Web Enrollment fixture for lab corpus and generated profile tests."
+    ],
+    "limitations": [
+      "AD CS Web Enrollment relayability also depends on certificate templates and account context.",
+      "EPA diagnostics should be compared against the same endpoint path and IIS authentication provider order."
+    ]
+  },
+  "captures": [
+    {
+      "finding_ref": "F-0001",
+      "host": "ca01.lab.redteamnotes.com",
+      "port": 80,
+      "protocol": "http",
+      "finding_name": "adcs_web_enrollment",
+      "target_family": "adcs_web_enrollment",
+      "status": "candidate",
+      "confidence": "high",
+      "observed_signature": {
+        "target_family": "adcs_web_enrollment",
+        "protocol": "http",
+        "finding_name": "adcs_web_enrollment",
+        "response_classification": "synthetic_auth_rejected",
+        "auth_validation_observed": true,
+        "http_status": 401,
+        "http_auth_status": 401,
+        "cbt_hash_observed": false
+      },
+      "expected": {
+        "policy_state": "adcs_epa_off",
+        "classification": "synthetic_auth_rejected",
+        "calibrated_state": "adcs_web_enrollment_rejects_invalid_credentials_no_epa_signal",
+        "confidence": "medium",
+        "promotion": "retain",
+        "promotion_reason": "The endpoint rejected invalid credentials without an EPA/CBT-specific signal.",
+        "remaining_uncertainty": [
+          "This does not prove ESC8 exploitability or template enrollment viability."
+        ]
+      },
+      "raw_evidence": [
+        {
+          "type": "observed",
+          "key": "ntlm_authenticate_validation",
+          "value": true,
+          "confidence": "medium",
+          "detail": "Synthetic invalid credentials were rejected.",
+          "raw": {
+            "sent": true,
+            "status_code": 401,
+            "reason": "Unauthorized",
+            "cbt_hash": ""
+          }
+        },
+        {
+          "type": "inferred",
+          "key": "relayx_response_classification",
+          "value": "synthetic_auth_rejected",
+          "confidence": "medium",
+          "detail": "No AD CS EPA diagnostic was observed.",
+          "raw": {}
+        }
+      ],
+      "review": {
+        "status": "fixture_only",
+        "promotion_decision": "retain",
+        "reviewed_by": "RedteamNotes",
+        "reviewed_at": "2026-06-05T00:00:00+00:00",
+        "reason": "Synthetic fixture expectation is retained for matrix tests and is not approved as real lab promotion evidence.",
+        "limitations": [
+          "Synthetic fixture only.",
+          "Collect authorized repeated lab captures and operator review before promotion."
+        ]
+      }
+    },
+    {
+      "finding_ref": "F-0002",
+      "host": "ca02.lab.redteamnotes.com",
+      "port": 443,
+      "protocol": "https",
+      "finding_name": "adcs_web_enrollment",
+      "target_family": "adcs_web_enrollment",
+      "status": "candidate",
+      "confidence": "high",
+      "observed_signature": {
+        "target_family": "adcs_web_enrollment",
+        "protocol": "https",
+        "finding_name": "adcs_web_enrollment",
+        "response_classification": "possible_epa_cbt_enforcement",
+        "auth_validation_observed": true,
+        "http_status": 401,
+        "http_auth_status": 401,
+        "tls_certificate_observed": true,
+        "cbt_hash_observed": true,
+        "response_keywords": [
+          "channel_binding",
+          "extended_protection"
+        ]
+      },
+      "expected": {
+        "policy_state": "adcs_epa_required",
+        "classification": "possible_epa_cbt_enforcement",
+        "calibrated_state": "adcs_epa_or_cbt_enforcement_signal",
+        "confidence": "medium",
+        "promotion": "promote",
+        "promotion_reason": "The endpoint returned stable EPA/CBT-specific wording in the required policy state.",
+        "remaining_uncertainty": [
+          "Promotion should be limited to matching IIS and AD CS Web Enrollment builds until repeated lab captures exist."
+        ]
+      },
+      "raw_evidence": [
+        {
+          "type": "observed",
+          "key": "tls_certificate_sha256",
+          "value": "fixture-adcs-required-cert",
+          "confidence": "medium",
+          "detail": "Fixture TLS certificate marker.",
+          "raw": {}
+        },
+        {
+          "type": "observed",
+          "key": "ntlm_authenticate_validation",
+          "value": true,
+          "confidence": "medium",
+          "detail": "Synthetic invalid credentials produced an AD CS EPA diagnostic.",
+          "raw": {
+            "sent": true,
+            "status_code": 401,
+            "reason": "Extended Protection required",
+            "www_authenticate": "NTLM channel binding required",
+            "cbt_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "type": "inferred",
+          "key": "relayx_response_classification",
+          "value": "possible_epa_cbt_enforcement",
+          "confidence": "medium",
+          "detail": "EPA or CBT diagnostic wording was observed.",
+          "raw": {}
+        }
+      ],
+      "review": {
+        "status": "fixture_only",
+        "promotion_decision": "not_for_promotion",
+        "reviewed_by": "RedteamNotes",
+        "reviewed_at": "2026-06-05T00:00:00+00:00",
+        "reason": "Synthetic fixture expectation is retained for matrix tests and is not approved as real lab promotion evidence.",
+        "limitations": [
+          "Synthetic fixture only.",
+          "Collect authorized repeated lab captures and operator review before promotion."
+        ]
+      }
+    }
+  ],
+  "provenance": {
+    "corpus_kind": "synthetic_fixture",
+    "data_origin": "synthetic",
+    "capture_source": "relayx_fixture",
+    "capture_method": "offline synthetic fixture corpus",
+    "authorization_ref": "fixture-only",
+    "operator": "redpen",
+    "review_status": "fixture_only",
+    "reviewed_by": "RedteamNotes",
+    "reviewed_at": "2026-06-05T00:00:00+00:00",
+    "review_reason": "Synthetic fixture for pipeline, schema, stability, and differential tests; not real lab promotion evidence."
+  },
+  "endpoint_build": {
+    "platform": "Windows Server synthetic fixture",
+    "server_role": "AD CS Web Enrollment with IIS",
+    "os_version": "fixture",
+    "product": "Microsoft AD CS Web Enrollment",
+    "product_version": "fixture",
+    "policy_matrix": "AD CS Web Enrollment EPA off/require",
+    "authentication_provider": "NTLM fixture",
+    "notes": [
+      "Synthetic endpoint build metadata keeps fixture structure explicit.",
+      "Replace with real OS, product, patch, provider order, and policy metadata for authorized lab captures."
+    ]
+  },
+  "drift_baseline": {
+    "baseline_id": "fixture-adcs-web-enrollment-epa",
+    "minimum_repeated_captures": 1,
+    "stable_required_keys": [
+      "response_classification",
+      "response_subclassification",
+      "policy_inference",
+      "oracle_signature",
+      "http_auth_status",
+      "ldap_result_code",
+      "ldap_diagnostic_contains_80090346",
+      "mssql_errors",
+      "mssql_loginack",
+      "tds_prelogin_encryption",
+      "tds_wrapped_tls",
+      "tls_certificate_observed",
+      "cbt_hash_observed",
+      "response_keywords"
+    ],
+    "known_unstable_keys": [
+      "target_family",
+      "protocol",
+      "finding_name",
+      "http_status",
+      "auth_validation_observed"
+    ],
+    "notes": [
+      "Synthetic fixture baseline uses one canonical capture per policy state for test determinism.",
+      "Real lab corpuses should raise minimum_repeated_captures and keep repeated raw signatures."
+    ]
+  }
+}

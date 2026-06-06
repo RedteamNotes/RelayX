@@ -1,0 +1,44 @@
+{
+  "profile_id": "ldaps_cbt",
+  "target_family": "ldaps_cbt",
+  "service": "ldaps",
+  "description": "LDAPS channel binding calibration profile for CBT never/when-supported/always modes.",
+  "discriminators": [
+    "response_classification",
+    "ldap_result_code",
+    "cbt_hash_observed",
+    "ldap_diagnostic_contains_80090346",
+    "response_keywords"
+  ],
+  "states": [
+    {
+      "name": "cbt_never_expected_invalid_credentials",
+      "calibrated_state": "ldaps_invalid_credentials_no_cbt_enforcement_signal",
+      "confidence": "medium",
+      "promotion": "retain",
+      "why": "LDAPS rejected synthetic credentials while CBT evidence was available but no CBT-specific diagnostic was observed.",
+      "match": {
+        "response_classification": "synthetic_auth_rejected",
+        "ldap_result_code": 49,
+        "cbt_hash_observed": true
+      },
+      "limitations": [
+        "This may also describe compatible CBT when-supported behavior; compare against a no-CBT or malformed-CBT baseline before promotion."
+      ]
+    },
+    {
+      "name": "cbt_always_bad_bindings",
+      "calibrated_state": "ldaps_cbt_enforcement_signal",
+      "confidence": "medium",
+      "promotion": "promote",
+      "why": "LDAPS returned a CBT-related diagnostic such as 80090346 or SEC_E_BAD_BINDINGS.",
+      "match": {
+        "response_classification": "possible_cbt_enforcement",
+        "ldap_diagnostic_contains_80090346": true
+      },
+      "limitations": [
+        "Promotion requires the diagnostic to be stable for CBT always mode in the lab and absent in CBT never mode."
+      ]
+    }
+  ]
+}

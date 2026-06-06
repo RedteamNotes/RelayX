@@ -1,0 +1,88 @@
+{
+  "profile_id": "mssql_epa",
+  "target_family": "mssql_epa",
+  "service": "mssql",
+  "description": "SQL Server TDS encryption and EPA/CBT calibration profile.",
+  "discriminators": [
+    "response_classification",
+    "tds_prelogin_encryption",
+    "tds_wrapped_tls",
+    "cbt_hash_observed",
+    "mssql_errors",
+    "response_keywords"
+  ],
+  "states": [
+    {
+      "name": "encrypt_off_no_auth_validation",
+      "calibrated_state": "mssql_encrypt_off_no_epa_evidence",
+      "confidence": "low",
+      "promotion": "retain",
+      "why": "SQL Server reported ENCRYPT_OFF and authenticate validation was not performed.",
+      "match": {
+        "response_classification": "not_performed",
+        "tds_prelogin_encryption": "ENCRYPT_OFF"
+      },
+      "limitations": [
+        "No authenticate-stage response was captured; EPA/CBT state cannot be promoted."
+      ]
+    },
+    {
+      "name": "encrypt_on_expected_login_failure_with_cbt",
+      "calibrated_state": "mssql_invalid_credentials_with_cbt_no_epa_signal",
+      "confidence": "medium",
+      "promotion": "retain",
+      "why": "TDS-wrapped TLS and CBT evidence were available, but SQL Server only returned ordinary login failure semantics.",
+      "match": {
+        "response_classification": "synthetic_auth_rejected",
+        "tds_prelogin_encryption": [
+          "ENCRYPT_ON",
+          "ENCRYPT_REQ"
+        ],
+        "cbt_hash_observed": true,
+        "mssql_errors": {
+          "any_contains": [
+            "login failed",
+            "invalid credentials"
+          ]
+        }
+      },
+      "limitations": [
+        "Ordinary login failure does not distinguish EPA disabled from EPA accept when CBT is present."
+      ]
+    },
+    {
+      "name": "encrypt_required_epa_binding_signal",
+      "calibrated_state": "mssql_epa_or_cbt_enforcement_signal",
+      "confidence": "medium",
+      "promotion": "promote",
+      "why": "SQL Server response contains EPA/CBT-related indicators under encrypted TDS.",
+      "match": {
+        "response_classification": "possible_epa_cbt_enforcement",
+        "tds_prelogin_encryption": "ENCRYPT_REQ",
+        "response_keywords": {
+          "any_contains": [
+            "channel_binding",
+            "extended_protection"
+          ]
+        }
+      },
+      "limitations": [
+        "SQL Server version and provider behavior must be calibrated because error wording can vary."
+      ]
+    },
+    {
+      "name": "encrypt_not_supported_cbt_unavailable",
+      "calibrated_state": "mssql_cbt_unavailable_encrypt_not_supported",
+      "confidence": "medium",
+      "promotion": "retain",
+      "why": "SQL Server reported encryption not supported, so TLS CBT evidence is unavailable.",
+      "match": {
+        "tds_prelogin_encryption": "ENCRYPT_NOT_SUP",
+        "tds_wrapped_tls": false
+      },
+      "limitations": [
+        "EPA/CBT state cannot be promoted when SQL Server does not provide TDS-wrapped TLS evidence."
+      ]
+    }
+  ]
+}

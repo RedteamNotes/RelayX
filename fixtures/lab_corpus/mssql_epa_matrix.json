@@ -1,0 +1,404 @@
+{
+  "metadata": {
+    "tool": "RelayX",
+    "version": "0.5.4",
+    "schema_version": 1,
+    "mode": "lab_signature_corpus",
+    "captured_at": "2026-06-05T00:00:00+00:00",
+    "label": "mssql-encryption-epa-policy-matrix",
+    "environment": "fixture-sql-server-tds",
+    "policy_state": "mixed_mssql_encryption_epa_matrix",
+    "source_result_version": "0.5.4",
+    "active_probe": true,
+    "finding_count": 4
+  },
+  "opsec": {
+    "network_actions_recorded": true,
+    "notes": [
+      "Synthetic MSSQL fixture covering ENCRYPT_OFF, ENCRYPT_ON, ENCRYPT_REQ, and ENCRYPT_NOT_SUP branches."
+    ],
+    "limitations": [
+      "SQL Server error text can vary by version, provider, language, and authentication configuration.",
+      "Ordinary login failure with CBT available does not prove EPA disabled versus EPA accept."
+    ]
+  },
+  "captures": [
+    {
+      "finding_ref": "F-0001",
+      "host": "sql01.lab.redteamnotes.com",
+      "port": 1433,
+      "protocol": "mssql",
+      "finding_name": "mssql_ntlm_epa",
+      "target_family": "mssql_epa",
+      "status": "candidate",
+      "confidence": "medium",
+      "observed_signature": {
+        "target_family": "mssql_epa",
+        "protocol": "mssql",
+        "finding_name": "mssql_ntlm_epa",
+        "response_classification": "not_performed",
+        "tds_prelogin_encryption": "ENCRYPT_OFF",
+        "tds_wrapped_tls": false,
+        "tls_certificate_observed": false,
+        "cbt_hash_observed": false
+      },
+      "expected": {
+        "policy_state": "mssql_encrypt_off_no_auth_validation",
+        "classification": "not_performed",
+        "calibrated_state": "mssql_encrypt_off_no_epa_evidence",
+        "confidence": "low",
+        "promotion": "retain",
+        "promotion_reason": "No authenticate-stage response or TLS CBT evidence was captured.",
+        "remaining_uncertainty": [
+          "EPA/CBT cannot be inferred when authenticate validation and TDS TLS evidence are unavailable."
+        ]
+      },
+      "raw_evidence": [
+        {
+          "type": "observed",
+          "key": "tds_prelogin_encryption",
+          "value": "ENCRYPT_OFF",
+          "confidence": "medium",
+          "detail": "SQL Server prelogin reported ENCRYPT_OFF.",
+          "raw": {}
+        },
+        {
+          "type": "observed",
+          "key": "tds_wrapped_tls",
+          "value": false,
+          "confidence": "medium",
+          "detail": "TDS-wrapped TLS was not established.",
+          "raw": {}
+        },
+        {
+          "type": "inferred",
+          "key": "relayx_response_classification",
+          "value": "not_performed",
+          "confidence": "low",
+          "detail": "Authenticate-stage validation was not performed.",
+          "raw": {}
+        }
+      ],
+      "review": {
+        "status": "fixture_only",
+        "promotion_decision": "retain",
+        "reviewed_by": "RedteamNotes",
+        "reviewed_at": "2026-06-05T00:00:00+00:00",
+        "reason": "Synthetic fixture expectation is retained for matrix tests and is not approved as real lab promotion evidence.",
+        "limitations": [
+          "Synthetic fixture only.",
+          "Collect authorized repeated lab captures and operator review before promotion."
+        ]
+      }
+    },
+    {
+      "finding_ref": "F-0002",
+      "host": "sql02.lab.redteamnotes.com",
+      "port": 1433,
+      "protocol": "mssql",
+      "finding_name": "mssql_ntlm_epa",
+      "target_family": "mssql_epa",
+      "status": "candidate",
+      "confidence": "high",
+      "observed_signature": {
+        "target_family": "mssql_epa",
+        "protocol": "mssql",
+        "finding_name": "mssql_ntlm_epa",
+        "response_classification": "synthetic_auth_rejected",
+        "auth_validation_observed": true,
+        "tds_prelogin_encryption": "ENCRYPT_ON",
+        "tds_wrapped_tls": true,
+        "tls_certificate_observed": true,
+        "cbt_hash_observed": true,
+        "mssql_errors": [
+          "Login failed for user 'redpen'."
+        ],
+        "mssql_loginack": false,
+        "response_keywords": [
+          "login_failed"
+        ]
+      },
+      "expected": {
+        "policy_state": "mssql_encrypt_on_invalid_credentials_with_cbt",
+        "classification": "synthetic_auth_rejected",
+        "calibrated_state": "mssql_invalid_credentials_with_cbt_no_epa_signal",
+        "confidence": "medium",
+        "promotion": "retain",
+        "promotion_reason": "TDS TLS and CBT were present, but SQL Server returned ordinary login failure semantics.",
+        "remaining_uncertainty": [
+          "This does not distinguish EPA disabled from EPA accept when valid CBT input is present."
+        ]
+      },
+      "raw_evidence": [
+        {
+          "type": "observed",
+          "key": "tds_prelogin_encryption",
+          "value": "ENCRYPT_ON",
+          "confidence": "medium",
+          "detail": "SQL Server prelogin reported ENCRYPT_ON.",
+          "raw": {}
+        },
+        {
+          "type": "observed",
+          "key": "tds_wrapped_tls",
+          "value": true,
+          "confidence": "high",
+          "detail": "TDS-wrapped TLS was established.",
+          "raw": {}
+        },
+        {
+          "type": "observed",
+          "key": "mssql_ntlm_authenticate_validation",
+          "value": true,
+          "confidence": "medium",
+          "detail": "Synthetic NTLM Authenticate produced ordinary SQL login failure.",
+          "raw": {
+            "sent": true,
+            "cbt_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+            "errors": [
+              "Login failed for user 'redpen'."
+            ],
+            "infos": [],
+            "loginack": false
+          }
+        },
+        {
+          "type": "inferred",
+          "key": "relayx_response_classification",
+          "value": "synthetic_auth_rejected",
+          "confidence": "medium",
+          "detail": "SQL login failure was observed without EPA-specific wording.",
+          "raw": {}
+        }
+      ],
+      "review": {
+        "status": "fixture_only",
+        "promotion_decision": "retain",
+        "reviewed_by": "RedteamNotes",
+        "reviewed_at": "2026-06-05T00:00:00+00:00",
+        "reason": "Synthetic fixture expectation is retained for matrix tests and is not approved as real lab promotion evidence.",
+        "limitations": [
+          "Synthetic fixture only.",
+          "Collect authorized repeated lab captures and operator review before promotion."
+        ]
+      }
+    },
+    {
+      "finding_ref": "F-0003",
+      "host": "sql03.lab.redteamnotes.com",
+      "port": 1433,
+      "protocol": "mssql",
+      "finding_name": "mssql_ntlm_epa",
+      "target_family": "mssql_epa",
+      "status": "candidate",
+      "confidence": "high",
+      "observed_signature": {
+        "target_family": "mssql_epa",
+        "protocol": "mssql",
+        "finding_name": "mssql_ntlm_epa",
+        "response_classification": "possible_epa_cbt_enforcement",
+        "auth_validation_observed": true,
+        "tds_prelogin_encryption": "ENCRYPT_REQ",
+        "tds_wrapped_tls": true,
+        "tls_certificate_observed": true,
+        "cbt_hash_observed": true,
+        "mssql_errors": [
+          "Login failed due to channel binding validation."
+        ],
+        "mssql_loginack": false,
+        "response_keywords": [
+          "channel_binding",
+          "extended_protection"
+        ]
+      },
+      "expected": {
+        "policy_state": "mssql_encrypt_req_epa_required",
+        "classification": "possible_epa_cbt_enforcement",
+        "calibrated_state": "mssql_epa_or_cbt_enforcement_signal",
+        "confidence": "medium",
+        "promotion": "promote",
+        "promotion_reason": "Encrypted TDS response carried channel-binding or Extended Protection wording.",
+        "remaining_uncertainty": [
+          "SQL Server version and provider behavior must be calibrated because error wording can vary."
+        ]
+      },
+      "raw_evidence": [
+        {
+          "type": "observed",
+          "key": "tds_prelogin_encryption",
+          "value": "ENCRYPT_REQ",
+          "confidence": "medium",
+          "detail": "SQL Server prelogin reported ENCRYPT_REQ.",
+          "raw": {}
+        },
+        {
+          "type": "observed",
+          "key": "tds_wrapped_tls",
+          "value": true,
+          "confidence": "high",
+          "detail": "TDS-wrapped TLS was established.",
+          "raw": {}
+        },
+        {
+          "type": "observed",
+          "key": "mssql_ntlm_authenticate_validation",
+          "value": true,
+          "confidence": "medium",
+          "detail": "Synthetic NTLM Authenticate produced an EPA/CBT diagnostic.",
+          "raw": {
+            "sent": true,
+            "cbt_hash": "0000000000000000000000000000000000000000000000000000000000000000",
+            "errors": [
+              "Login failed due to channel binding validation."
+            ],
+            "infos": [],
+            "loginack": false
+          }
+        },
+        {
+          "type": "inferred",
+          "key": "relayx_response_classification",
+          "value": "possible_epa_cbt_enforcement",
+          "confidence": "medium",
+          "detail": "EPA or CBT diagnostic wording was observed.",
+          "raw": {}
+        }
+      ],
+      "review": {
+        "status": "fixture_only",
+        "promotion_decision": "not_for_promotion",
+        "reviewed_by": "RedteamNotes",
+        "reviewed_at": "2026-06-05T00:00:00+00:00",
+        "reason": "Synthetic fixture expectation is retained for matrix tests and is not approved as real lab promotion evidence.",
+        "limitations": [
+          "Synthetic fixture only.",
+          "Collect authorized repeated lab captures and operator review before promotion."
+        ]
+      }
+    },
+    {
+      "finding_ref": "F-0004",
+      "host": "sql04.lab.redteamnotes.com",
+      "port": 1433,
+      "protocol": "mssql",
+      "finding_name": "mssql_ntlm_epa",
+      "target_family": "mssql_epa",
+      "status": "candidate",
+      "confidence": "medium",
+      "observed_signature": {
+        "target_family": "mssql_epa",
+        "protocol": "mssql",
+        "finding_name": "mssql_ntlm_epa",
+        "response_classification": "tls_not_available",
+        "tds_prelogin_encryption": "ENCRYPT_NOT_SUP",
+        "tds_wrapped_tls": false,
+        "tls_certificate_observed": false,
+        "cbt_hash_observed": false
+      },
+      "expected": {
+        "policy_state": "mssql_encrypt_not_supported",
+        "classification": "tls_not_available",
+        "calibrated_state": "mssql_cbt_unavailable_encrypt_not_supported",
+        "confidence": "medium",
+        "promotion": "retain",
+        "promotion_reason": "SQL Server reported encryption not supported, so CBT evidence is unavailable.",
+        "remaining_uncertainty": [
+          "EPA/CBT state cannot be promoted when TDS-wrapped TLS evidence is unavailable."
+        ]
+      },
+      "raw_evidence": [
+        {
+          "type": "observed",
+          "key": "tds_prelogin_encryption",
+          "value": "ENCRYPT_NOT_SUP",
+          "confidence": "medium",
+          "detail": "SQL Server prelogin reported ENCRYPT_NOT_SUP.",
+          "raw": {}
+        },
+        {
+          "type": "observed",
+          "key": "tds_wrapped_tls",
+          "value": false,
+          "confidence": "medium",
+          "detail": "TDS-wrapped TLS was unavailable.",
+          "raw": {}
+        },
+        {
+          "type": "unsupported",
+          "key": "relayx_response_classification",
+          "value": "tls_not_available",
+          "confidence": "medium",
+          "detail": "TLS CBT evidence is unavailable because SQL Server reported ENCRYPT_NOT_SUP.",
+          "raw": {}
+        }
+      ],
+      "review": {
+        "status": "fixture_only",
+        "promotion_decision": "retain",
+        "reviewed_by": "RedteamNotes",
+        "reviewed_at": "2026-06-05T00:00:00+00:00",
+        "reason": "Synthetic fixture expectation is retained for matrix tests and is not approved as real lab promotion evidence.",
+        "limitations": [
+          "Synthetic fixture only.",
+          "Collect authorized repeated lab captures and operator review before promotion."
+        ]
+      }
+    }
+  ],
+  "provenance": {
+    "corpus_kind": "synthetic_fixture",
+    "data_origin": "synthetic",
+    "capture_source": "relayx_fixture",
+    "capture_method": "offline synthetic fixture corpus",
+    "authorization_ref": "fixture-only",
+    "operator": "redpen",
+    "review_status": "fixture_only",
+    "reviewed_by": "RedteamNotes",
+    "reviewed_at": "2026-06-05T00:00:00+00:00",
+    "review_reason": "Synthetic fixture for pipeline, schema, stability, and differential tests; not real lab promotion evidence."
+  },
+  "endpoint_build": {
+    "platform": "Windows Server synthetic fixture",
+    "server_role": "SQL Server",
+    "os_version": "fixture",
+    "product": "Microsoft SQL Server",
+    "product_version": "fixture",
+    "policy_matrix": "MSSQL encryption and EPA",
+    "authentication_provider": "NTLM fixture",
+    "notes": [
+      "Synthetic endpoint build metadata keeps fixture structure explicit.",
+      "Replace with real OS, product, patch, provider order, and policy metadata for authorized lab captures."
+    ]
+  },
+  "drift_baseline": {
+    "baseline_id": "fixture-mssql-epa",
+    "minimum_repeated_captures": 1,
+    "stable_required_keys": [
+      "response_classification",
+      "response_subclassification",
+      "policy_inference",
+      "oracle_signature",
+      "http_auth_status",
+      "ldap_result_code",
+      "ldap_diagnostic_contains_80090346",
+      "mssql_errors",
+      "mssql_loginack",
+      "tds_prelogin_encryption",
+      "tds_wrapped_tls",
+      "tls_certificate_observed",
+      "cbt_hash_observed",
+      "response_keywords"
+    ],
+    "known_unstable_keys": [
+      "target_family",
+      "protocol",
+      "finding_name",
+      "http_status",
+      "auth_validation_observed"
+    ],
+    "notes": [
+      "Synthetic fixture baseline uses one canonical capture per policy state for test determinism.",
+      "Real lab corpuses should raise minimum_repeated_captures and keep repeated raw signatures."
+    ]
+  }
+}

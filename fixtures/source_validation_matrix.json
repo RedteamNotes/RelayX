@@ -1,0 +1,95 @@
+{
+  "name": "RelayX source validation matrix",
+  "version": 1,
+  "commands": [
+    "source-check",
+    "source-plan"
+  ],
+  "capabilities": [
+    "webclient",
+    "spooler",
+    "efsrpc",
+    "dfsnm",
+    "fsrvp",
+    "mssql_outbound",
+    "name_resolution"
+  ],
+  "states": [
+    "modeled",
+    "plan_only",
+    "network_surface_observed",
+    "network_surface_not_observed",
+    "out_of_scope",
+    "no_capability",
+    "planned",
+    "scope_blocked",
+    "opsec_blocked",
+    "error"
+  ],
+  "boundaries": [
+    "no_webclient_trigger",
+    "no_rpc_coercion_call",
+    "no_sql_outbound_auth_primitive",
+    "no_adidns_or_spn_change",
+    "no_credential_relay",
+    "connect_check_is_tcp_only",
+    "listener_scope_contract",
+    "callback_scope_contract"
+  ],
+  "scenarios": [
+    {
+      "id": "SOURCE-WEBCLIENT-MODELED",
+      "command": "source-check",
+      "capability": "webclient",
+      "connect_check": false,
+      "expected_state": "modeled"
+    },
+    {
+      "id": "SOURCE-WEBCLIENT-CONNECT-CHECK",
+      "command": "source-check",
+      "capability": "webclient",
+      "connect_check": true,
+      "expected_state": "plan_only",
+      "network_action": false
+    },
+    {
+      "id": "SOURCE-RPC-TCP-CHECK",
+      "command": "source-check",
+      "capability": "spooler",
+      "connect_check": true,
+      "expected_action": "tcp_connect_135_445",
+      "forbidden_action": "rpc_method_call"
+    },
+    {
+      "id": "SOURCE-MSSQL-TCP-CHECK",
+      "command": "source-check",
+      "capability": "mssql_outbound",
+      "connect_check": true,
+      "expected_action": "tcp_connect_1433",
+      "forbidden_action": "sql_command"
+    },
+    {
+      "id": "SOURCE-NAME-RESOLUTION-PLAN",
+      "command": "source-plan",
+      "capability": "name_resolution",
+      "expected_state": "planned",
+      "forbidden_action": "dns_or_spn_change"
+    },
+    {
+      "id": "SOURCE-PLAN-LISTENER-CALLBACK-SCOPE",
+      "command": "source-plan",
+      "capability": "webclient",
+      "listener_host": "listener01",
+      "callback_host": "callback01",
+      "expected_contract": "scope_contract"
+    },
+    {
+      "id": "SOURCE-PLAN-CALLBACK-OUT-OF-SCOPE",
+      "command": "source-plan",
+      "capability": "webclient",
+      "callback_host": "callback01",
+      "expected_state": "scope_blocked",
+      "expected_guardrail_failure": "scope_callback"
+    }
+  ]
+}

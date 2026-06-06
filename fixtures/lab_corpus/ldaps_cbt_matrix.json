@@ -1,0 +1,306 @@
+{
+  "metadata": {
+    "tool": "RelayX",
+    "version": "0.5.4",
+    "schema_version": 1,
+    "mode": "lab_signature_corpus",
+    "captured_at": "2026-06-05T00:00:00+00:00",
+    "label": "ldaps-cbt-policy-matrix",
+    "environment": "fixture-windows-domain-controller-ldaps",
+    "policy_state": "mixed_ldaps_cbt_matrix",
+    "source_result_version": "0.5.4",
+    "active_probe": true,
+    "finding_count": 3
+  },
+  "opsec": {
+    "network_actions_recorded": true,
+    "notes": [
+      "Synthetic LDAPS CBT fixture for never, when-supported-with-CBT, and always/bad-bindings states."
+    ],
+    "limitations": [
+      "CBT never and when-supported with valid CBT may be indistinguishable with invalid credentials.",
+      "Promotion should rely on a stable bad-bindings diagnostic or a controlled malformed-CBT baseline."
+    ]
+  },
+  "captures": [
+    {
+      "finding_ref": "F-0001",
+      "host": "dc01.lab.redteamnotes.com",
+      "port": 636,
+      "protocol": "ldaps",
+      "finding_name": "ldaps_channel_binding",
+      "target_family": "ldaps_cbt",
+      "status": "candidate",
+      "confidence": "medium",
+      "observed_signature": {
+        "target_family": "ldaps_cbt",
+        "protocol": "ldaps",
+        "finding_name": "ldaps_channel_binding",
+        "response_classification": "synthetic_auth_rejected",
+        "auth_validation_observed": true,
+        "ldap_result_code": 49,
+        "tls_certificate_observed": true,
+        "cbt_hash_observed": true
+      },
+      "expected": {
+        "policy_state": "ldaps_cbt_never",
+        "classification": "synthetic_auth_rejected",
+        "calibrated_state": "ldaps_invalid_credentials_no_cbt_enforcement_signal",
+        "confidence": "medium",
+        "promotion": "retain",
+        "promotion_reason": "LDAPS rejected invalid credentials with CBT available but no CBT diagnostic.",
+        "remaining_uncertainty": [
+          "This may also match when-supported behavior when valid CBT is supplied."
+        ]
+      },
+      "raw_evidence": [
+        {
+          "type": "observed",
+          "key": "tls_certificate_sha256",
+          "value": "fixture-ldaps-never-cert",
+          "confidence": "medium",
+          "detail": "Fixture LDAPS certificate marker.",
+          "raw": {}
+        },
+        {
+          "type": "observed",
+          "key": "ldap_ntlm_authenticate_validation",
+          "value": true,
+          "confidence": "medium",
+          "detail": "Synthetic SASL NTLM bind was rejected as invalid credentials.",
+          "raw": {
+            "sent": true,
+            "result_code": 49,
+            "diagnostic_message": "invalidCredentials",
+            "cbt_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "type": "inferred",
+          "key": "relayx_response_classification",
+          "value": "synthetic_auth_rejected",
+          "confidence": "medium",
+          "detail": "No CBT-specific diagnostic was observed.",
+          "raw": {}
+        }
+      ],
+      "review": {
+        "status": "fixture_only",
+        "promotion_decision": "retain",
+        "reviewed_by": "RedteamNotes",
+        "reviewed_at": "2026-06-05T00:00:00+00:00",
+        "reason": "Synthetic fixture expectation is retained for matrix tests and is not approved as real lab promotion evidence.",
+        "limitations": [
+          "Synthetic fixture only.",
+          "Collect authorized repeated lab captures and operator review before promotion."
+        ]
+      }
+    },
+    {
+      "finding_ref": "F-0002",
+      "host": "dc02.lab.redteamnotes.com",
+      "port": 636,
+      "protocol": "ldaps",
+      "finding_name": "ldaps_channel_binding",
+      "target_family": "ldaps_cbt",
+      "status": "candidate",
+      "confidence": "medium",
+      "observed_signature": {
+        "target_family": "ldaps_cbt",
+        "protocol": "ldaps",
+        "finding_name": "ldaps_channel_binding",
+        "response_classification": "synthetic_auth_rejected",
+        "auth_validation_observed": true,
+        "ldap_result_code": 49,
+        "tls_certificate_observed": true,
+        "cbt_hash_observed": true
+      },
+      "expected": {
+        "policy_state": "ldaps_cbt_when_supported_valid_cbt",
+        "classification": "synthetic_auth_rejected",
+        "calibrated_state": "ldaps_invalid_credentials_no_cbt_enforcement_signal",
+        "confidence": "medium",
+        "promotion": "retain",
+        "promotion_reason": "When-supported accepted valid CBT input and returned ordinary invalid-credential semantics.",
+        "remaining_uncertainty": [
+          "Valid CBT does not distinguish CBT never from CBT when-supported; compare with malformed-CBT captures."
+        ]
+      },
+      "raw_evidence": [
+        {
+          "type": "observed",
+          "key": "tls_certificate_sha256",
+          "value": "fixture-ldaps-when-supported-cert",
+          "confidence": "medium",
+          "detail": "Fixture LDAPS certificate marker.",
+          "raw": {}
+        },
+        {
+          "type": "observed",
+          "key": "ldap_ntlm_authenticate_validation",
+          "value": true,
+          "confidence": "medium",
+          "detail": "Synthetic SASL NTLM bind was rejected as invalid credentials with CBT input available.",
+          "raw": {
+            "sent": true,
+            "result_code": 49,
+            "diagnostic_message": "invalidCredentials",
+            "cbt_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "type": "inferred",
+          "key": "relayx_response_classification",
+          "value": "synthetic_auth_rejected",
+          "confidence": "medium",
+          "detail": "No CBT-specific diagnostic was observed.",
+          "raw": {}
+        }
+      ],
+      "review": {
+        "status": "fixture_only",
+        "promotion_decision": "retain",
+        "reviewed_by": "RedteamNotes",
+        "reviewed_at": "2026-06-05T00:00:00+00:00",
+        "reason": "Synthetic fixture expectation is retained for matrix tests and is not approved as real lab promotion evidence.",
+        "limitations": [
+          "Synthetic fixture only.",
+          "Collect authorized repeated lab captures and operator review before promotion."
+        ]
+      }
+    },
+    {
+      "finding_ref": "F-0003",
+      "host": "dc03.lab.redteamnotes.com",
+      "port": 636,
+      "protocol": "ldaps",
+      "finding_name": "ldaps_channel_binding",
+      "target_family": "ldaps_cbt",
+      "status": "candidate",
+      "confidence": "medium",
+      "observed_signature": {
+        "target_family": "ldaps_cbt",
+        "protocol": "ldaps",
+        "finding_name": "ldaps_channel_binding",
+        "response_classification": "possible_cbt_enforcement",
+        "auth_validation_observed": true,
+        "ldap_result_code": 49,
+        "ldap_diagnostic_contains_80090346": true,
+        "tls_certificate_observed": true,
+        "cbt_hash_observed": true,
+        "response_keywords": [
+          "channel_binding"
+        ]
+      },
+      "expected": {
+        "policy_state": "ldaps_cbt_always_bad_bindings",
+        "classification": "possible_cbt_enforcement",
+        "calibrated_state": "ldaps_cbt_enforcement_signal",
+        "confidence": "medium",
+        "promotion": "promote",
+        "promotion_reason": "LDAPS returned a stable 80090346 bad-bindings diagnostic under CBT always.",
+        "remaining_uncertainty": [
+          "Promotion requires the diagnostic to be absent in CBT never and stable across repeated CBT always captures."
+        ]
+      },
+      "raw_evidence": [
+        {
+          "type": "observed",
+          "key": "tls_certificate_sha256",
+          "value": "fixture-ldaps-always-cert",
+          "confidence": "medium",
+          "detail": "Fixture LDAPS certificate marker.",
+          "raw": {}
+        },
+        {
+          "type": "observed",
+          "key": "ldap_ntlm_authenticate_validation",
+          "value": true,
+          "confidence": "medium",
+          "detail": "Synthetic SASL NTLM bind returned a CBT bad-bindings diagnostic.",
+          "raw": {
+            "sent": true,
+            "result_code": 49,
+            "diagnostic_message": "AcceptSecurityContext error, data 80090346",
+            "cbt_hash": "0000000000000000000000000000000000000000000000000000000000000000"
+          }
+        },
+        {
+          "type": "inferred",
+          "key": "relayx_response_classification",
+          "value": "possible_cbt_enforcement",
+          "confidence": "medium",
+          "detail": "CBT diagnostic wording was observed.",
+          "raw": {}
+        }
+      ],
+      "review": {
+        "status": "fixture_only",
+        "promotion_decision": "not_for_promotion",
+        "reviewed_by": "RedteamNotes",
+        "reviewed_at": "2026-06-05T00:00:00+00:00",
+        "reason": "Synthetic fixture expectation is retained for matrix tests and is not approved as real lab promotion evidence.",
+        "limitations": [
+          "Synthetic fixture only.",
+          "Collect authorized repeated lab captures and operator review before promotion."
+        ]
+      }
+    }
+  ],
+  "provenance": {
+    "corpus_kind": "synthetic_fixture",
+    "data_origin": "synthetic",
+    "capture_source": "relayx_fixture",
+    "capture_method": "offline synthetic fixture corpus",
+    "authorization_ref": "fixture-only",
+    "operator": "redpen",
+    "review_status": "fixture_only",
+    "reviewed_by": "RedteamNotes",
+    "reviewed_at": "2026-06-05T00:00:00+00:00",
+    "review_reason": "Synthetic fixture for pipeline, schema, stability, and differential tests; not real lab promotion evidence."
+  },
+  "endpoint_build": {
+    "platform": "Windows Server synthetic fixture",
+    "server_role": "Domain Controller",
+    "os_version": "fixture",
+    "product": "Active Directory Domain Services LDAPS",
+    "product_version": "fixture",
+    "policy_matrix": "LDAPS CBT never/when-supported/always",
+    "authentication_provider": "NTLM fixture",
+    "notes": [
+      "Synthetic endpoint build metadata keeps fixture structure explicit.",
+      "Replace with real OS, product, patch, provider order, and policy metadata for authorized lab captures."
+    ]
+  },
+  "drift_baseline": {
+    "baseline_id": "fixture-ldaps-cbt",
+    "minimum_repeated_captures": 1,
+    "stable_required_keys": [
+      "response_classification",
+      "response_subclassification",
+      "policy_inference",
+      "oracle_signature",
+      "http_auth_status",
+      "ldap_result_code",
+      "ldap_diagnostic_contains_80090346",
+      "mssql_errors",
+      "mssql_loginack",
+      "tds_prelogin_encryption",
+      "tds_wrapped_tls",
+      "tls_certificate_observed",
+      "cbt_hash_observed",
+      "response_keywords"
+    ],
+    "known_unstable_keys": [
+      "target_family",
+      "protocol",
+      "finding_name",
+      "http_status",
+      "auth_validation_observed"
+    ],
+    "notes": [
+      "Synthetic fixture baseline uses one canonical capture per policy state for test determinism.",
+      "Real lab corpuses should raise minimum_repeated_captures and keep repeated raw signatures."
+    ]
+  }
+}

@@ -1,0 +1,57 @@
+{
+  "key": "ntlmrelayx_compat",
+  "label": "ntlmrelayx-inspired compatibility boundary",
+  "version": "0.5.4-fixture",
+  "supported": false,
+  "lab_only": true,
+  "description": "Fixture manifest for a future Impacket-style adapter boundary.",
+  "reason": "RelayX has not registered a lab-validated live relay adapter for this boundary.",
+  "target_families": [
+    "adcs_web_enrollment",
+    "http_ntlm",
+    "ldap_signing",
+    "ldaps_channel_binding",
+    "mssql_epa",
+    "smb_unsigned",
+    "winrm_ntlm"
+  ],
+  "source_capabilities": [
+    "*"
+  ],
+  "modes": [
+    "confirmed"
+  ],
+  "network_action": "future_relay_module",
+  "adapter": "unsupported",
+  "credential_policy": "none",
+  "listener_policy": "none",
+  "lifecycle": [
+    "prepare",
+    "execute",
+    "cleanup"
+  ],
+  "requires": [
+    "lab_validated_adapter",
+    "scoped_listener",
+    "credential_handling_review"
+  ],
+  "artifacts": [
+    "execution_record",
+    "module_plan"
+  ],
+  "forbidden_actions": [
+    "unscoped_listener",
+    "credential_storage_without_policy",
+    "source_trigger_without_plan"
+  ],
+  "one_shot": true,
+  "timeout_behavior": "fail_closed",
+  "timeout_seconds": 0,
+  "expected_telemetry": [
+    "Lab-only fixture contract; no live telemetry is expected because the adapter is not registered."
+  ],
+  "evidence_capture": [
+    "module_plan",
+    "execution_record_fixture"
+  ]
+}

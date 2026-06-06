@@ -1,0 +1,44 @@
+{
+  "profile_id": "ldap_signing",
+  "target_family": "ldap_signing",
+  "service": "ldap",
+  "description": "LDAP signing calibration profile for LDAP/389 SASL NTLM bind validation.",
+  "discriminators": [
+    "response_classification",
+    "ldap_result_code",
+    "response_keywords"
+  ],
+  "states": [
+    {
+      "name": "ldap_signing_not_required_invalid_credentials",
+      "calibrated_state": "expected_invalid_credentials_no_signing_signal",
+      "confidence": "medium",
+      "promotion": "retain",
+      "why": "LDAP returned invalidCredentials for synthetic NTLM Authenticate without a stronger-auth signal.",
+      "match": {
+        "response_classification": "synthetic_auth_rejected",
+        "ldap_result_code": 49
+      },
+      "limitations": [
+        "Invalid credentials alone do not prove LDAP signing is disabled or relayable."
+      ]
+    },
+    {
+      "name": "ldap_signing_required_stronger_auth",
+      "calibrated_state": "ldap_signing_or_confidentiality_required",
+      "confidence": "medium",
+      "promotion": "promote",
+      "why": "LDAP returned a stronger-auth or confidentiality requirement in the bind response.",
+      "match": {
+        "response_classification": "stronger_auth_or_confidentiality_required",
+        "ldap_result_code": [
+          8,
+          13
+        ]
+      },
+      "limitations": [
+        "Result codes 8 and 13 indicate stronger protection requirements, but environment policy should be confirmed against domain controller settings."
+      ]
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "profile_id": "adcs_web_enrollment_epa",
+  "target_family": "adcs_web_enrollment",
+  "service": "http",
+  "description": "AD CS Web Enrollment EPA calibration profile.",
+  "discriminators": [
+    "response_classification",
+    "http_auth_status",
+    "cbt_hash_observed",
+    "response_keywords"
+  ],
+  "states": [
+    {
+      "name": "adcs_epa_off_expected_invalid_credentials",
+      "calibrated_state": "adcs_web_enrollment_rejects_invalid_credentials_no_epa_signal",
+      "confidence": "medium",
+      "promotion": "retain",
+      "why": "The AD CS endpoint rejected synthetic credentials without an EPA/CBT-specific signal.",
+      "match": {
+        "response_classification": "synthetic_auth_rejected",
+        "http_auth_status": [
+          401,
+          403
+        ]
+      },
+      "limitations": [
+        "This does not prove ESC8 exploitability; certificate template and account context are outside this calibration state."
+      ]
+    },
+    {
+      "name": "adcs_epa_required_binding_signal",
+      "calibrated_state": "adcs_epa_or_cbt_enforcement_signal",
+      "confidence": "medium",
+      "promotion": "promote",
+      "why": "The AD CS endpoint produced an EPA/CBT-specific response signal.",
+      "match": {
+        "response_classification": "possible_epa_cbt_enforcement",
+        "response_keywords": {
+          "any_contains": [
+            "channel_binding",
+            "extended_protection"
+          ]
+        }
+      },
+      "limitations": [
+        "AD CS Web Enrollment should be validated with endpoint-specific HTTPS and IIS EPA configuration baselines."
+      ]
+    }
+  ]
+}

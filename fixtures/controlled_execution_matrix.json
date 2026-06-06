@@ -1,0 +1,180 @@
+{
+  "name": "RelayX controlled execution matrix",
+  "version": 1,
+  "commands": [
+    "run"
+  ],
+  "modes": [
+    "dry-run",
+    "armed",
+    "confirmed"
+  ],
+  "modules": [
+    {
+      "key": "noop",
+      "supported": false,
+      "network_action": false
+    },
+    {
+      "key": "ntlmrelayx_compat",
+      "supported": false,
+      "network_action": "future_relay_module"
+    }
+  ],
+  "guardrails": [
+    "mode",
+    "single_path",
+    "path_status",
+    "calculus_decision",
+    "calculus_readiness",
+    "timebox",
+    "noise_budget",
+    "source_trigger_boundary",
+    "module_registered",
+    "adapter_registered",
+    "credential_policy",
+    "listener_policy",
+    "adapter_support_consistency",
+    "module_support",
+    "scope_target",
+    "scope_source",
+    "scope_listener",
+    "scope_callback",
+    "scope_explicit_listener_callback",
+    "confirmed_scope_required",
+    "lab_only_live_module_boundary",
+    "execution_contract",
+    "execution_timeout",
+    "execution_one_shot",
+    "execution_timeout_behavior",
+    "source_trigger_target_relay_separation",
+    "confirm_flag",
+    "operator",
+    "reason",
+    "audit_log"
+  ],
+  "result_states": [
+    "blocked",
+    "dry_run",
+    "armed",
+    "no_module_available",
+    "adapter_not_registered",
+    "adapter_failed",
+    "executed_offline",
+    "not_implemented"
+  ],
+  "evidence_contract": [
+    "relayx_execution_run"
+  ],
+  "boundaries": [
+    "no_unscoped_path_execution",
+    "no_implicit_operator_confirmation",
+    "no_live_relay_module_by_default",
+    "no_credential_capture_or_forwarding_in_execution_core",
+    "no_source_side_trigger_execution",
+    "listener_callback_scope_contract",
+    "confirmed_execution_requires_explicit_scope",
+    "one_shot_execution_contract",
+    "fail_closed_timeout_behavior",
+    "source_trigger_and_target_relay_are_separate_contracts"
+  ],
+  "scenarios": [
+    {
+      "id": "EXECUTION-DRY-RUN",
+      "mode": "dry-run",
+      "module": "noop",
+      "expected_result": "dry_run",
+      "network_action": false
+    },
+    {
+      "id": "EXECUTION-ARMED",
+      "mode": "armed",
+      "module": "noop",
+      "expected_result": "armed",
+      "network_action": false
+    },
+    {
+      "id": "EXECUTION-CONFIRMED-NOOP",
+      "mode": "confirmed",
+      "module": "noop",
+      "requires": [
+        "confirm_flag",
+        "operator",
+        "reason",
+        "scope",
+        "audit_log"
+      ],
+      "expected_result": "no_module_available",
+      "network_action": false
+    },
+    {
+      "id": "EXECUTION-CONFIRMED-NON-READY",
+      "mode": "confirmed",
+      "decision": "candidate_needs_validation",
+      "expected_guardrail_failure": "calculus_readiness",
+      "override": "accept_non_ready"
+    },
+    {
+      "id": "EXECUTION-BLOCKED-PATH",
+      "mode": "dry-run",
+      "decision": "blocked",
+      "expected_result": "blocked",
+      "expected_guardrail_failure": "calculus_decision"
+    },
+    {
+      "id": "EXECUTION-SCOPE-NOISE-GUARDRAILS",
+      "mode": "dry-run",
+      "expected_guardrail_failures": [
+        "scope_target",
+        "noise_budget"
+      ]
+    },
+    {
+      "id": "EXECUTION-LISTENER-CALLBACK-SCOPE",
+      "mode": "dry-run",
+      "listener_host": "listener01",
+      "callback_host": "callback01",
+      "expected_contract": "scope_contract"
+    },
+    {
+      "id": "EXECUTION-LISTENER-WITHOUT-SCOPE",
+      "mode": "dry-run",
+      "listener_host": "listener01",
+      "expected_guardrail_failure": "scope_explicit_listener_callback"
+    },
+    {
+      "id": "EXECUTION-CONFIRMED-SCOPE-REQUIRED",
+      "mode": "confirmed",
+      "expected_guardrail_failure": "confirmed_scope_required"
+    },
+    {
+      "id": "EXECUTION-LAB-ONLY-FIXTURE-BOUNDARY",
+      "mode": "confirmed",
+      "module": "lab_only_target_relay_fixture",
+      "expected_guardrail_failures": [
+        "adapter_registered",
+        "lab_only_live_module_boundary"
+      ]
+    },
+    {
+      "id": "EXECUTION-REGISTERED-LAB-ONLY-FIXTURE-BOUNDARY",
+      "mode": "confirmed",
+      "module": "lab_only_registered_fixture",
+      "expected_guardrail_failure": "lab_only_live_module_boundary",
+      "expected_adapter_registered": true,
+      "expected_adapter_dispatch": false
+    },
+    {
+      "id": "EXECUTION-CONTRACT-ONE-SHOT-TIMEOUT",
+      "mode": "confirmed",
+      "module": "relayx_audit_record",
+      "expected_guardrail": "execution_contract",
+      "expected_timeout_behavior": "fail_closed"
+    },
+    {
+      "id": "EXECUTION-ANNOTATE-RESULT",
+      "mode": "dry-run",
+      "expected_evidence": "relayx_execution_run"
+    }
+  ]
+}

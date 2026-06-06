@@ -1,0 +1,210 @@
+{
+  "metadata": {
+    "tool": "RelayX",
+    "version": "0.5.4",
+    "schema_version": 1,
+    "mode": "lab_signature_corpus",
+    "captured_at": "2026-06-05T00:00:00+00:00",
+    "label": "ldap-signing-policy-matrix",
+    "environment": "fixture-windows-domain-controller",
+    "policy_state": "mixed_ldap_signing_matrix",
+    "source_result_version": "0.5.4",
+    "active_probe": true,
+    "finding_count": 2
+  },
+  "opsec": {
+    "network_actions_recorded": true,
+    "notes": [
+      "Synthetic LDAP signing fixture for lab corpus and generated profile tests."
+    ],
+    "limitations": [
+      "LDAP invalidCredentials alone must not be treated as proof that signing is disabled.",
+      "Domain controller policy and SASL mechanism negotiation should be confirmed in the lab."
+    ]
+  },
+  "captures": [
+    {
+      "finding_ref": "F-0001",
+      "host": "dc01.lab.redteamnotes.com",
+      "port": 389,
+      "protocol": "ldap",
+      "finding_name": "ldap_signing",
+      "target_family": "ldap_signing",
+      "status": "candidate",
+      "confidence": "medium",
+      "observed_signature": {
+        "target_family": "ldap_signing",
+        "protocol": "ldap",
+        "finding_name": "ldap_signing",
+        "response_classification": "synthetic_auth_rejected",
+        "auth_validation_observed": true,
+        "ldap_result_code": 49
+      },
+      "expected": {
+        "policy_state": "ldap_signing_none",
+        "classification": "synthetic_auth_rejected",
+        "calibrated_state": "expected_invalid_credentials_no_signing_signal",
+        "confidence": "medium",
+        "promotion": "retain",
+        "promotion_reason": "LDAP returned invalidCredentials without stronger-auth or confidentiality diagnostics.",
+        "remaining_uncertainty": [
+          "Invalid credentials do not prove signing is disabled or that relay will succeed."
+        ]
+      },
+      "raw_evidence": [
+        {
+          "type": "observed",
+          "key": "ldap_ntlm_authenticate_validation",
+          "value": true,
+          "confidence": "medium",
+          "detail": "Synthetic SASL NTLM bind was rejected as invalid credentials.",
+          "raw": {
+            "sent": true,
+            "result_code": 49,
+            "diagnostic_message": "invalidCredentials"
+          }
+        },
+        {
+          "type": "inferred",
+          "key": "relayx_response_classification",
+          "value": "synthetic_auth_rejected",
+          "confidence": "medium",
+          "detail": "No LDAP signing requirement diagnostic was observed.",
+          "raw": {}
+        }
+      ],
+      "review": {
+        "status": "fixture_only",
+        "promotion_decision": "retain",
+        "reviewed_by": "RedteamNotes",
+        "reviewed_at": "2026-06-05T00:00:00+00:00",
+        "reason": "Synthetic fixture expectation is retained for matrix tests and is not approved as real lab promotion evidence.",
+        "limitations": [
+          "Synthetic fixture only.",
+          "Collect authorized repeated lab captures and operator review before promotion."
+        ]
+      }
+    },
+    {
+      "finding_ref": "F-0002",
+      "host": "dc02.lab.redteamnotes.com",
+      "port": 389,
+      "protocol": "ldap",
+      "finding_name": "ldap_signing",
+      "target_family": "ldap_signing",
+      "status": "candidate",
+      "confidence": "medium",
+      "observed_signature": {
+        "target_family": "ldap_signing",
+        "protocol": "ldap",
+        "finding_name": "ldap_signing",
+        "response_classification": "stronger_auth_or_confidentiality_required",
+        "auth_validation_observed": true,
+        "ldap_result_code": 8,
+        "response_keywords": [
+          "stronger_auth"
+        ]
+      },
+      "expected": {
+        "policy_state": "ldap_signing_required",
+        "classification": "stronger_auth_or_confidentiality_required",
+        "calibrated_state": "ldap_signing_or_confidentiality_required",
+        "confidence": "medium",
+        "promotion": "promote",
+        "promotion_reason": "LDAP returned strongerAuthRequired under the required signing policy state.",
+        "remaining_uncertainty": [
+          "Result code wording can vary; confirm against domain controller policy and LDAP server build."
+        ]
+      },
+      "raw_evidence": [
+        {
+          "type": "observed",
+          "key": "ldap_ntlm_authenticate_validation",
+          "value": true,
+          "confidence": "medium",
+          "detail": "Synthetic SASL NTLM bind returned strongerAuthRequired.",
+          "raw": {
+            "sent": true,
+            "result_code": 8,
+            "diagnostic_message": "strongerAuthRequired"
+          }
+        },
+        {
+          "type": "inferred",
+          "key": "relayx_response_classification",
+          "value": "stronger_auth_or_confidentiality_required",
+          "confidence": "medium",
+          "detail": "LDAP signing or confidentiality requirement was inferred from the result code.",
+          "raw": {}
+        }
+      ],
+      "review": {
+        "status": "fixture_only",
+        "promotion_decision": "not_for_promotion",
+        "reviewed_by": "RedteamNotes",
+        "reviewed_at": "2026-06-05T00:00:00+00:00",
+        "reason": "Synthetic fixture expectation is retained for matrix tests and is not approved as real lab promotion evidence.",
+        "limitations": [
+          "Synthetic fixture only.",
+          "Collect authorized repeated lab captures and operator review before promotion."
+        ]
+      }
+    }
+  ],
+  "provenance": {
+    "corpus_kind": "synthetic_fixture",
+    "data_origin": "synthetic",
+    "capture_source": "relayx_fixture",
+    "capture_method": "offline synthetic fixture corpus",
+    "authorization_ref": "fixture-only",
+    "operator": "redpen",
+    "review_status": "fixture_only",
+    "reviewed_by": "RedteamNotes",
+    "reviewed_at": "2026-06-05T00:00:00+00:00",
+    "review_reason": "Synthetic fixture for pipeline, schema, stability, and differential tests; not real lab promotion evidence."
+  },
+  "endpoint_build": {
+    "platform": "Windows Server synthetic fixture",
+    "server_role": "Domain Controller",
+    "os_version": "fixture",
+    "product": "Active Directory Domain Services LDAP",
+    "product_version": "fixture",
+    "policy_matrix": "LDAP signing none/require",
+    "authentication_provider": "NTLM fixture",
+    "notes": [
+      "Synthetic endpoint build metadata keeps fixture structure explicit.",
+      "Replace with real OS, product, patch, provider order, and policy metadata for authorized lab captures."
+    ]
+  },
+  "drift_baseline": {
+    "baseline_id": "fixture-ldap-signing",
+    "minimum_repeated_captures": 1,
+    "stable_required_keys": [
+      "response_classification",
+      "response_subclassification",
+      "policy_inference",
+      "oracle_signature",
+      "http_auth_status",
+      "ldap_result_code",
+      "ldap_diagnostic_contains_80090346",
+      "mssql_errors",
+      "mssql_loginack",
+      "tds_prelogin_encryption",
+      "tds_wrapped_tls",
+      "tls_certificate_observed",
+      "cbt_hash_observed",
+      "response_keywords"
+    ],
+    "known_unstable_keys": [
+      "target_family",
+      "protocol",
+      "finding_name",
+      "http_status",
+      "auth_validation_observed"
+    ],
+    "notes": [
+      "Synthetic fixture baseline uses one canonical capture per policy state for test determinism.",
+      "Real lab corpuses should raise minimum_repeated_captures and keep repeated raw signatures."
+    ]
+  }
+}

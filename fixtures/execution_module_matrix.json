@@ -1,0 +1,185 @@
+{
+  "name": "RelayX execution module compatibility matrix",
+  "version": 1,
+  "commands": [
+    "modules",
+    "module-plan",
+    "run"
+  ],
+  "manifest_contract": [
+    "key",
+    "label",
+    "version",
+    "supported",
+    "reason",
+    "target_families",
+    "source_capabilities",
+    "modes",
+    "network_action",
+    "adapter",
+    "credential_policy",
+    "listener_policy",
+    "lifecycle",
+    "requires",
+    "artifacts",
+    "forbidden_actions",
+    "lab_only",
+    "one_shot",
+    "timeout_behavior",
+    "timeout_seconds",
+    "expected_telemetry",
+    "evidence_capture"
+  ],
+  "built_in_modules": [
+    "noop",
+    "relayx_audit_record",
+    "ntlmrelayx_compat"
+  ],
+  "fixture_modules": [
+    "lab_only_target_relay_fixture"
+  ],
+  "states": [
+    "not_applicable",
+    "blocked_by_calculus",
+    "needs_validation_or_calibration",
+    "unsupported",
+    "ready",
+    "adapter_not_registered",
+    "executed_offline"
+  ],
+  "adapter_sdk": {
+    "version": 1,
+    "registered_adapters": [
+      "unsupported",
+      "offline_audit_record"
+    ],
+    "lifecycle": [
+      "prepare",
+      "execute",
+      "cleanup"
+    ],
+    "safe_credential_policies": [
+      "none",
+      "no_credentials",
+      "synthetic_only"
+    ],
+    "safe_listener_policies": [
+      "none",
+      "no_listener"
+    ]
+  },
+  "safe_adapters": [
+    {
+      "key": "relayx_audit_record",
+      "adapter": "offline_audit_record",
+      "network_action": false,
+      "credential_handling": false,
+      "credential_policy": "none",
+      "listener_policy": "none"
+    }
+  ],
+  "boundaries": [
+    "adapter_registry_controls_execution_not_manifest_alone",
+    "supported_modules_must_not_use_unsupported_adapter_boundary",
+    "credential_policy_must_be_sdk_allowed",
+    "listener_policy_must_be_sdk_allowed",
+    "adapter_lifecycle_is_audited",
+    "module_manifest_describes_capability_only",
+    "unsupported_modules_do_not_execute",
+    "offline_audit_record_performs_no_network_action",
+    "lab_only_fixture_is_not_registered_live_execution",
+    "one_shot_execution_contract_required",
+    "timeout_behavior_is_fail_closed",
+    "evidence_capture_contract_is_recorded",
+    "live_relay_modules_require_future_lab_validation",
+    "source_triggers_remain_outside_module_plan_execution"
+  ],
+  "scenarios": [
+    {
+      "id": "MODULE-INVENTORY-DEFAULTS",
+      "command": "modules",
+      "expected_modules": [
+        "noop",
+        "relayx_audit_record",
+        "ntlmrelayx_compat"
+      ]
+    },
+    {
+      "id": "MODULE-MANIFEST-DIR",
+      "command": "modules",
+      "manifests": "fixtures/execution_modules",
+      "expected_modules": [
+        "relayx_audit_record",
+        "ntlmrelayx_compat",
+        "lab_only_target_relay_fixture"
+      ]
+    },
+    {
+      "id": "MODULE-PLAN-READY",
+      "command": "module-plan",
+      "module": "relayx_audit_record",
+      "target_family": "smb_unsigned",
+      "decision": "candidate_ready",
+      "expected_state": "ready",
+      "expected_executable": true
+    },
+    {
+      "id": "MODULE-PLAN-NEEDS-VALIDATION",
+      "command": "module-plan",
+      "module": "relayx_audit_record",
+      "decision": "candidate_needs_validation",
+      "expected_state": "needs_validation_or_calibration"
+    },
+    {
+      "id": "MODULE-PLAN-UNSUPPORTED",
+      "command": "module-plan",
+      "module": "ntlmrelayx_compat",
+      "expected_state": "unsupported"
+    },
+    {
+      "id": "MODULE-PLAN-LAB-ONLY-FIXTURE",
+      "command": "module-plan",
+      "module": "lab_only_target_relay_fixture",
+      "decision": "candidate_ready",
+      "expected_state": "unsupported",
+      "expected_lab_only": true,
+      "expected_adapter_registered": false
+    },
+    {
+      "id": "MODULE-RUN-OFFLINE-ADAPTER",
+      "command": "run",
+      "module": "relayx_audit_record",
+      "mode": "confirmed",
+      "requires": [
+        "confirm_flag",
+        "operator",
+        "reason",
+        "scope",
+        "audit_log"
+      ],
+      "expected_result": "executed_offline",
+      "network_action": false
+    },
+    {
+      "id": "MODULE-RUN-UNREGISTERED-ADAPTER",
+      "command": "run",
+      "module": "lab_live",
+      "mode": "confirmed",
+      "expected_guardrail_failure": "adapter_registered"
+    },
+    {
+      "id": "MODULE-RUN-UNSAFE-CREDENTIAL-POLICY",
+      "command": "run",
+      "module": "unsafe_policy",
+      "mode": "confirmed",
+      "expected_guardrail_failure": "credential_policy"
+    },
+    {
+      "id": "MODULE-RUN-CONFIRMED-SCOPE-REQUIRED",
+      "command": "run",
+      "module": "relayx_audit_record",
+      "mode": "confirmed",
+      "expected_guardrail_failure": "confirmed_scope_required"
+    }
+  ]
+}

@@ -1,0 +1,83 @@
+{
+  "sources": [
+    {
+      "host": "jump01.redteamnotes.com",
+      "capabilities": {
+        "webclient": true,
+        "spooler": true,
+        "mssql_outbound": false,
+        "name_resolution": false
+      },
+      "tags": [
+        "workstation",
+        "tier1",
+        "tutorial"
+      ],
+      "session": "ligolo-jump01",
+      "segment": "workstations",
+      "subnets": [
+        "10.20.0.0/16"
+      ],
+      "route_hops": [
+        {
+          "id": "hop-ligolo-1",
+          "kind": "ligolo",
+          "name": "ligolo-jump01",
+          "subnets": [
+            "10.20.0.0/16",
+            "10.30.0.0/16"
+          ],
+          "risk_level": "medium",
+          "noise": "low",
+          "requires_listener": false,
+          "notes": [
+            "Tutorial metadata only; RelayX does not open this pivot session."
+          ]
+        }
+      ],
+      "noise_limit": "medium",
+      "notes": [
+        "Represents an already authorized operator session for offline path modeling."
+      ]
+    },
+    {
+      "host": "sqlagent01.redteamnotes.com",
+      "capabilities": {
+        "webclient": false,
+        "spooler": false,
+        "mssql_outbound": true,
+        "name_resolution": false
+      },
+      "tags": [
+        "sql",
+        "tier1",
+        "tutorial"
+      ],
+      "session": "sliver-sqlagent01",
+      "segment": "database",
+      "subnets": [
+        "10.40.0.0/16"
+      ],
+      "route_hops": [
+        {
+          "id": "hop-sliver-1",
+          "kind": "sliver_p2p",
+          "name": "sliver-sqlagent01",
+          "subnets": [
+            "10.40.0.0/16"
+          ],
+          "risk_level": "high",
+          "noise": "medium",
+          "requires_listener": true,
+          "notes": [
+            "Higher-risk route metadata used to demonstrate route risk scoring."
+          ]
+        }
+      ],
+      "noise_limit": "medium",
+      "notes": [
+        "Represents a SQL-adjacent source for outbound-auth planning examples."
+      ]
+    }
+  ]
+}

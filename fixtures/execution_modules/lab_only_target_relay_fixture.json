@@ -1,0 +1,70 @@
+{
+  "key": "lab_only_target_relay_fixture",
+  "label": "Lab-only target relay adapter fixture",
+  "version": "0.5.4-fixture",
+  "supported": false,
+  "lab_only": true,
+  "description": "Fixture manifest for a future live target relay adapter contract. It is intentionally not registered or supported.",
+  "reason": "Live relay execution remains disabled until protocol design, credential handling, OPSEC, and authorized lab regression reviews pass.",
+  "target_families": [
+    "adcs_web_enrollment",
+    "http_ntlm",
+    "ldap_signing",
+    "ldaps_channel_binding",
+    "mssql_epa",
+    "smb_unsigned",
+    "winrm_ntlm"
+  ],
+  "source_capabilities": [
+    "*"
+  ],
+  "modes": [
+    "confirmed"
+  ],
+  "network_action": "lab_only_target_relay_fixture",
+  "adapter": "lab_only_target_relay_fixture",
+  "credential_policy": "synthetic_only",
+  "listener_policy": "no_listener",
+  "lifecycle": [
+    "prepare",
+    "execute",
+    "cleanup"
+  ],
+  "requires": [
+    "authorized_lab_profile",
+    "protocol_design_review",
+    "credential_handling_review",
+    "opsec_review",
+    "lab_regression_evidence",
+    "scoped_target",
+    "scoped_listener_or_no_listener",
+    "one_shot_timebox"
+  ],
+  "artifacts": [
+    "execution_record_fixture",
+    "adapter_contract",
+    "lab_regression_matrix"
+  ],
+  "forbidden_actions": [
+    "credential_capture",
+    "credential_forwarding",
+    "credential_storage_without_policy",
+    "source_trigger_without_plan",
+    "unscoped_listener",
+    "multi_target_sweep"
+  ],
+  "one_shot": true,
+  "timeout_behavior": "fail_closed",
+  "timeout_seconds": 60,
+  "expected_telemetry": [
+    "Lab-only target relay fixture dispatch record.",
+    "Adapter lifecycle evidence for prepare, execute, and cleanup phases.",
+    "No production listener, credential capture, or credential forwarding telemetry is expected because this fixture is not registered."
+  ],
+  "evidence_capture": [
+    "adapter_contract",
+    "execution_record_fixture",
+    "guardrail_outcomes",
+    "lab_regression_reference"
+  ]
+}

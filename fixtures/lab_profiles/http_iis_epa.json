@@ -1,0 +1,69 @@
+{
+  "profile_id": "http_iis_epa",
+  "target_family": "http_iis_epa",
+  "service": "http",
+  "description": "IIS NTLM EPA calibration profile for generic HTTP/HTTPS endpoints.",
+  "discriminators": [
+    "response_classification",
+    "http_auth_status",
+    "cbt_hash_observed",
+    "response_keywords"
+  ],
+  "states": [
+    {
+      "name": "epa_off_expected_invalid_credentials",
+      "calibrated_state": "expected_invalid_credentials_no_epa_signal",
+      "confidence": "medium",
+      "promotion": "retain",
+      "why": "Synthetic credentials were rejected with a normal HTTP 401/403 style response and no EPA/CBT keywords.",
+      "match": {
+        "response_classification": "synthetic_auth_rejected",
+        "http_auth_status": [
+          401,
+          403
+        ],
+        "cbt_hash_observed": false
+      },
+      "limitations": [
+        "This state does not prove EPA is disabled; it only separates ordinary credential rejection from EPA-specific signals."
+      ]
+    },
+    {
+      "name": "epa_accept_or_indistinguishable_with_cbt",
+      "calibrated_state": "invalid_credentials_with_cbt_evidence_no_epa_signal",
+      "confidence": "medium",
+      "promotion": "retain",
+      "why": "CBT input was available and synthetic credentials were rejected without an EPA-specific diagnostic.",
+      "match": {
+        "response_classification": "synthetic_auth_rejected",
+        "http_auth_status": [
+          401,
+          403
+        ],
+        "cbt_hash_observed": true
+      },
+      "limitations": [
+        "IIS EPA Accept and disabled modes may be indistinguishable with random credentials unless paired with a no-CBT baseline."
+      ]
+    },
+    {
+      "name": "epa_required_binding_signal",
+      "calibrated_state": "epa_or_cbt_enforcement_signal",
+      "confidence": "medium",
+      "promotion": "promote",
+      "why": "The HTTP authenticate response contains EPA/CBT-specific wording or classifier signals.",
+      "match": {
+        "response_classification": "possible_epa_cbt_enforcement",
+        "response_keywords": {
+          "any_contains": [
+            "channel_binding",
+            "extended_protection"
+          ]
+        }
+      },
+      "limitations": [
+        "Promotion requires this wording to be stable across repeated lab captures for the same IIS build and endpoint."
+      ]
+    }
+  ]
+}

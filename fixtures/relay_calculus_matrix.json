@@ -1,0 +1,82 @@
+{
+  "name": "RelayX relay calculus matrix",
+  "version": 1,
+  "path_evidence_contract": [
+    "relayx_rule_id",
+    "relayx_target_family",
+    "relayx_preconditions",
+    "relayx_hardening_gates",
+    "relayx_decision",
+    "relayx_controls"
+  ],
+  "decisions": [
+    "blocked",
+    "investigate_anomaly",
+    "candidate_needs_calibration",
+    "candidate_needs_validation",
+    "candidate_ready"
+  ],
+  "target_families": [
+    "adcs_web_enrollment",
+    "winrm_ntlm",
+    "http_ntlm",
+    "smb_unsigned",
+    "ldap_signing",
+    "ldaps_channel_binding",
+    "mssql_epa",
+    "generic_ntlm"
+  ],
+  "controls": [
+    "adcs_hardening",
+    "credential_boundary",
+    "http_epa",
+    "ldap_channel_binding",
+    "ldap_signing",
+    "mssql_epa",
+    "mssql_service_account_hardening",
+    "name_resolution_hardening",
+    "ntlm_restriction",
+    "outbound_auth_egress",
+    "rpc_coercion_reduction",
+    "smb_signing",
+    "webclient_hardening"
+  ],
+  "scenarios": [
+    {
+      "id": "CALC-ADCS-WEBCLIENT",
+      "source_capability": "webclient",
+      "target_family": "adcs_web_enrollment",
+      "expected_rule_prefix": "RX-ADCS-HTTP",
+      "expected_controls": [
+        "adcs_hardening",
+        "http_epa",
+        "webclient_hardening"
+      ],
+      "expected_decision_without_auth_validation": "candidate_needs_validation"
+    },
+    {
+      "id": "CALC-LDAPS-CBT-SIGNAL",
+      "target_family": "ldaps_channel_binding",
+      "response_classification": "possible_cbt_enforcement",
+      "expected_decision": "candidate_needs_calibration"
+    },
+    {
+      "id": "CALC-SMB-SIGNING-BLOCKED",
+      "target_family": "smb_unsigned",
+      "smb_signing_required": true,
+      "expected_decision": "blocked",
+      "expected_controls": [
+        "smb_signing"
+      ]
+    },
+    {
+      "id": "CALC-MSSQL-EPA-UNKNOWN",
+      "target_family": "mssql_epa",
+      "response_classification": "not_performed",
+      "expected_decision": "candidate_needs_validation",
+      "expected_controls": [
+        "mssql_epa"
+      ]
+    }
+  ]
+}

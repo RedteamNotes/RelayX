@@ -1,0 +1,56 @@
+{
+  "key": "relayx_audit_record",
+  "label": "RelayX offline audit record adapter",
+  "version": "0.5.4-fixture",
+  "supported": true,
+  "lab_only": false,
+  "description": "Fixture manifest for the safe offline adapter. It records execution evidence only.",
+  "reason": "The adapter performs no network action, starts no listener, and handles no credentials.",
+  "target_families": [
+    "*"
+  ],
+  "source_capabilities": [
+    "*"
+  ],
+  "modes": [
+    "dry-run",
+    "armed",
+    "confirmed"
+  ],
+  "network_action": "none",
+  "adapter": "offline_audit_record",
+  "credential_policy": "none",
+  "listener_policy": "none",
+  "lifecycle": [
+    "prepare",
+    "execute",
+    "cleanup"
+  ],
+  "requires": [
+    "confirmed_operator_context",
+    "audit_log"
+  ],
+  "artifacts": [
+    "execution_record",
+    "jsonl_audit_entry",
+    "optional_result_annotation"
+  ],
+  "forbidden_actions": [
+    "listener_start",
+    "credential_capture",
+    "credential_forwarding",
+    "source_trigger"
+  ],
+  "one_shot": true,
+  "timeout_behavior": "fail_closed",
+  "timeout_seconds": 0,
+  "expected_telemetry": [
+    "RelayX JSONL audit entry for the controlled execution decision.",
+    "No listener, credential handler, relay session, or source trigger telemetry is expected."
+  ],
+  "evidence_capture": [
+    "execution_record",
+    "adapter_lifecycle",
+    "jsonl_audit_entry"
+  ]
+}

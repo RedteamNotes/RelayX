@@ -1,0 +1,11 @@
+# Offline tutorial scope.
+# Keep both hostnames and representative lab CIDRs so scope examples are clear.
+filesrv01.redteamnotes.com
+dc01.redteamnotes.com
+ca01.redteamnotes.com
+sql01.redteamnotes.com
+jump01.redteamnotes.com
+sqlagent01.redteamnotes.com
+10.20.0.0/16
+10.30.0.0/16
+10.40.0.0/16

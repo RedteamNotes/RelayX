@@ -1,0 +1,789 @@
+{
+  "findings": [
+    {
+      "blockers": [],
+      "confidence": "high",
+      "error": "",
+      "evidence": [
+        {
+          "confidence": "high",
+          "detail": "SMB server allows unsigned sessions.",
+          "key": "smb_signing_required",
+          "raw": {
+            "security_mode": "signing_enabled_not_required"
+          },
+          "type": "observed",
+          "value": false
+        },
+        {
+          "confidence": "high",
+          "detail": "SMB security mode was parsed from the negotiation response.",
+          "key": "smb_security_mode",
+          "raw": {},
+          "type": "observed",
+          "value": "signing_enabled_not_required"
+        }
+      ],
+      "fixes": [
+        "Require SMB signing on this server."
+      ],
+      "host": "filesrv01.redteamnotes.com",
+      "impact": "medium",
+      "name": "smb_signing",
+      "opsec_notes": [
+        "Target readiness only; no credential relay was attempted."
+      ],
+      "port": 445,
+      "protocol": "smb",
+      "status": "relayable",
+      "summary": "SMB signing is not required."
+    },
+    {
+      "blockers": [
+        "EPA state is not proven without a lab-calibrated baseline."
+      ],
+      "confidence": "high",
+      "error": "",
+      "evidence": [
+        {
+          "confidence": "high",
+          "detail": "HTTP returned an NTLM challenge.",
+          "key": "http_status",
+          "raw": {},
+          "type": "observed",
+          "value": 401
+        },
+        {
+          "confidence": "high",
+          "detail": "WWW-Authenticate advertised NTLM.",
+          "key": "www_authenticate",
+          "raw": {},
+          "type": "observed",
+          "value": [
+            "Negotiate",
+            "NTLM"
+          ]
+        },
+        {
+          "confidence": "high",
+          "detail": "NTLM Type2 challenge was observed.",
+          "key": "ntlm_type2_challenge",
+          "raw": {},
+          "type": "observed",
+          "value": true
+        },
+        {
+          "confidence": "medium",
+          "detail": "Synthetic credentials were rejected; this is expected and does not prove EPA state.",
+          "key": "relayx_response_classification",
+          "raw": {},
+          "type": "inferred",
+          "value": "synthetic_auth_rejected"
+        },
+        {
+          "confidence": "medium",
+          "detail": "Response family from the HTTP oracle.",
+          "key": "relayx_response_subclassification",
+          "raw": {},
+          "type": "inferred",
+          "value": "invalid_credentials"
+        },
+        {
+          "confidence": "medium",
+          "detail": "EPA was not proven by the response alone.",
+          "key": "relayx_policy_inference",
+          "raw": {},
+          "type": "inferred",
+          "value": "epa_not_proven"
+        },
+        {
+          "confidence": "medium",
+          "detail": "Synthetic rejection is not enough to distinguish EPA off, accepted, or required.",
+          "key": "relayx_remaining_uncertainty",
+          "raw": {},
+          "type": "inferred",
+          "value": [
+            "Collect a lab-calibrated baseline for this exact AD CS Web Enrollment endpoint.",
+            "Review EPA configuration and IIS authentication provider order before promotion."
+          ]
+        }
+      ],
+      "fixes": [
+        "Enable EPA on AD CS Web Enrollment.",
+        "Disable AD CS Web Enrollment if it is not required."
+      ],
+      "host": "ca01.redteamnotes.com",
+      "impact": "high",
+      "name": "adcs_web_enrollment",
+      "opsec_notes": [
+        "AD CS Web Enrollment paths are high impact; validate only with explicit scope and telemetry planning."
+      ],
+      "port": 80,
+      "protocol": "http",
+      "status": "candidate",
+      "summary": "AD CS Web Enrollment advertises NTLM and needs EPA calibration."
+    },
+    {
+      "blockers": [
+        "LDAP signing policy was not conclusively validated."
+      ],
+      "confidence": "medium",
+      "error": "",
+      "evidence": [
+        {
+          "confidence": "high",
+          "detail": "RootDSE advertised NTLM through SASL mechanisms.",
+          "key": "ldap_sasl_ntlm_type2_challenge",
+          "raw": {},
+          "type": "observed",
+          "value": true
+        },
+        {
+          "confidence": "medium",
+          "detail": "Synthetic credentials were rejected in a normal-looking way.",
+          "key": "relayx_response_classification",
+          "raw": {},
+          "type": "inferred",
+          "value": "synthetic_auth_rejected"
+        },
+        {
+          "confidence": "medium",
+          "detail": "LDAP signing cannot be proven from this response alone.",
+          "key": "relayx_policy_inference",
+          "raw": {},
+          "type": "inferred",
+          "value": "ldap_signing_not_proven"
+        },
+        {
+          "confidence": "medium",
+          "detail": "Synthetic rejection does not prove whether LDAP signing is required.",
+          "key": "relayx_remaining_uncertainty",
+          "raw": {},
+          "type": "inferred",
+          "value": [
+            "Collect an authorized LDAP signing lab baseline before promotion.",
+            "Correlate with domain controller signing policy and failed-bind telemetry."
+          ]
+        }
+      ],
+      "fixes": [
+        "Require LDAP signing on domain controllers.",
+        "Restrict NTLM where feasible."
+      ],
+      "host": "dc01.redteamnotes.com",
+      "impact": "medium",
+      "name": "ldap_signing",
+      "opsec_notes": [
+        "Authenticate-stage validation was synthetic and used placeholder credentials."
+      ],
+      "port": 389,
+      "protocol": "ldap",
+      "status": "candidate",
+      "summary": "LDAP accepted NTLM negotiation, but signing enforcement remains conservative."
+    },
+    {
+      "blockers": [
+        "MSSQL EPA enforcement requires lab baseline comparison."
+      ],
+      "confidence": "medium",
+      "error": "",
+      "evidence": [
+        {
+          "confidence": "high",
+          "detail": "SQL Server negotiated encryption.",
+          "key": "tds_prelogin_encryption",
+          "raw": {},
+          "type": "observed",
+          "value": "ENCRYPT_ON"
+        },
+        {
+          "confidence": "high",
+          "detail": "TDS-wrapped TLS completed for CBT evidence.",
+          "key": "tds_wrapped_tls",
+          "raw": {},
+          "type": "observed",
+          "value": true
+        },
+        {
+          "confidence": "high",
+          "detail": "tls-server-end-point CBT hash was computed from the SQL Server certificate.",
+          "key": "mssql_cbt_tls_server_end_point",
+          "raw": {},
+          "type": "observed",
+          "value": "sha256:6c2f0f4b86e5c5a4d84ed3f4a3e9630f8d5573f52d19ef5e5a2e0d9f8d3f1111"
+        },
+        {
+          "confidence": "high",
+          "detail": "MSSQL Login7 SSPI Type2 challenge was observed.",
+          "key": "mssql_sspi_ntlm_type2_challenge",
+          "raw": {},
+          "type": "observed",
+          "value": true
+        },
+        {
+          "confidence": "medium",
+          "detail": "Synthetic credentials were rejected; EPA enforcement remains unproven.",
+          "key": "relayx_response_classification",
+          "raw": {},
+          "type": "inferred",
+          "value": "synthetic_auth_rejected"
+        },
+        {
+          "confidence": "medium",
+          "detail": "MSSQL EPA cannot be proven from rejection semantics alone.",
+          "key": "relayx_policy_inference",
+          "raw": {},
+          "type": "inferred",
+          "value": "mssql_epa_not_proven"
+        },
+        {
+          "confidence": "medium",
+          "detail": "TLS CBT evidence exists, but server EPA enforcement still needs a lab baseline.",
+          "key": "relayx_remaining_uncertainty",
+          "raw": {},
+          "type": "inferred",
+          "value": [
+            "Compare against SQL Server ENCRYPT_ON and EPA-required lab captures.",
+            "Review SQL Server Extended Protection and channel binding configuration."
+          ]
+        }
+      ],
+      "fixes": [
+        "Require encryption and EPA for SQL Server endpoints.",
+        "Review SQL Server service account exposure and outbound authentication."
+      ],
+      "host": "sql01.redteamnotes.com",
+      "impact": "high",
+      "name": "mssql_epa",
+      "opsec_notes": [
+        "MSSQL evidence includes TDS-wrapped TLS and CBT material, but no credential relay."
+      ],
+      "port": 1433,
+      "protocol": "mssql",
+      "status": "candidate",
+      "summary": "MSSQL NTLM challenge and TLS CBT evidence were observed; EPA enforcement remains conservative."
+    },
+    {
+      "blockers": [
+        "LDAPS route is not reachable from the modeled source."
+      ],
+      "confidence": "medium",
+      "error": "",
+      "evidence": [
+        {
+          "confidence": "high",
+          "detail": "LDAPS certificate hash was observed in the lab sample.",
+          "key": "tls_certificate_sha256",
+          "raw": {},
+          "type": "observed",
+          "value": "8b4d7f4f76e4b4c9c9a1e5f2b3c6d7e8f90123456789abcdef0123456789abcd"
+        },
+        {
+          "confidence": "medium",
+          "detail": "LDAPS Type2 evidence exists but path reachability is blocked.",
+          "key": "ldap_sasl_ntlm_type2_challenge",
+          "raw": {},
+          "type": "observed",
+          "value": true
+        }
+      ],
+      "fixes": [
+        "Require LDAP channel binding where supported.",
+        "Review LDAPS exposure by segment."
+      ],
+      "host": "dc01.redteamnotes.com",
+      "impact": "medium",
+      "name": "ldaps_cbt",
+      "opsec_notes": [
+        "This finding is kept as a route-awareness example and not as a reachable path."
+      ],
+      "port": 636,
+      "protocol": "ldaps",
+      "status": "blocked",
+      "summary": "LDAPS CBT evidence exists, but the modeled route blocks this path."
+    }
+  ],
+  "metadata": {
+    "active": false,
+    "finished_at": "2026-06-06T09:08:00+00:00",
+    "mode": "tutorial-offline",
+    "schema_version": 1,
+    "source_count": 2,
+    "started_at": "2026-06-06T09:00:00+00:00",
+    "target_count": 4,
+    "tool": "RelayX",
+    "version": "0.1.13"
+  },
+  "paths": [
+    {
+      "blockers": [
+        "EPA state is not proven without lab calibration."
+      ],
+      "confidence": "high",
+      "evidence": [
+        {
+          "confidence": "medium",
+          "detail": "Modeled source capability used for this path.",
+          "key": "source_capability",
+          "raw": {},
+          "type": "inferred",
+          "value": "webclient"
+        },
+        {
+          "confidence": "high",
+          "detail": "Target matched explicit route metadata.",
+          "key": "route_reachable",
+          "raw": {},
+          "type": "inferred",
+          "value": true
+        },
+        {
+          "confidence": "high",
+          "detail": "Route state from source route_hops.",
+          "key": "route_reachability_state",
+          "raw": {},
+          "type": "inferred",
+          "value": "routed"
+        },
+        {
+          "confidence": "medium",
+          "detail": "Route risk level from pivot metadata.",
+          "key": "route_risk_level",
+          "raw": {},
+          "type": "inferred",
+          "value": "medium"
+        },
+        {
+          "confidence": "medium",
+          "detail": "Controls that reduce this path.",
+          "key": "relayx_controls",
+          "raw": {},
+          "type": "inferred",
+          "value": [
+            "adcs_hardening",
+            "http_epa",
+            "webclient_hardening",
+            "ntlm_restriction"
+          ]
+        },
+        {
+          "confidence": "high",
+          "detail": "HTTP NTLM Type2 challenge was observed.",
+          "key": "ntlm_type2_challenge",
+          "raw": {},
+          "type": "observed",
+          "value": true
+        },
+        {
+          "confidence": "medium",
+          "detail": "Synthetic auth rejection does not prove EPA state.",
+          "key": "relayx_response_classification",
+          "raw": {},
+          "type": "inferred",
+          "value": "synthetic_auth_rejected"
+        },
+        {
+          "confidence": "medium",
+          "detail": "AD CS Web Enrollment EPA state remains unproven without lab calibration.",
+          "key": "relayx_policy_inference",
+          "raw": {},
+          "type": "inferred",
+          "value": "epa_not_proven"
+        },
+        {
+          "confidence": "medium",
+          "detail": "The path remains candidate-only until endpoint-specific EPA behavior is calibrated.",
+          "key": "relayx_remaining_uncertainty",
+          "raw": {},
+          "type": "inferred",
+          "value": [
+            "Synthetic rejection does not distinguish EPA off, accepted, or required.",
+            "Validate the exact /certsrv endpoint against a lab profile before promotion."
+          ]
+        }
+      ],
+      "fixes": [
+        "Enable EPA on AD CS Web Enrollment.",
+        "Disable AD CS Web Enrollment if it is not required.",
+        "Restrict WebClient/WebDAV on sources that do not require it."
+      ],
+      "id": "PX-0001",
+      "impact": "high",
+      "opsec_notes": [
+        "Validate as one path only; avoid broad relay listeners.",
+        "Expected telemetry includes IIS failed authentication if confirmed reprobe is enabled."
+      ],
+      "score": 86.5,
+      "source": "jump01.redteamnotes.com",
+      "status": "candidate",
+      "summary": "AD CS Web Enrollment is a high-impact candidate reachable through a modeled Ligolo route, but EPA state remains conservative.",
+      "target": "ca01.redteamnotes.com",
+      "target_service": "HTTP/80 /certsrv",
+      "transport": "HTTP/NTLM"
+    },
+    {
+      "blockers": [],
+      "confidence": "high",
+      "evidence": [
+        {
+          "confidence": "medium",
+          "detail": "Modeled source capability used for this path.",
+          "key": "source_capability",
+          "raw": {},
+          "type": "inferred",
+          "value": "webclient"
+        },
+        {
+          "confidence": "high",
+          "detail": "SMB server allows unsigned sessions.",
+          "key": "smb_signing_required",
+          "raw": {},
+          "type": "observed",
+          "value": false
+        },
+        {
+          "confidence": "medium",
+          "detail": "Controls that reduce this path.",
+          "key": "relayx_controls",
+          "raw": {},
+          "type": "inferred",
+          "value": [
+            "smb_signing",
+            "ntlm_restriction"
+          ]
+        },
+        {
+          "confidence": "high",
+          "detail": "Route matched explicit source metadata.",
+          "key": "route_reachable",
+          "raw": {},
+          "type": "inferred",
+          "value": true
+        }
+      ],
+      "fixes": [
+        "Require SMB signing on this server."
+      ],
+      "id": "PX-0002",
+      "impact": "medium",
+      "opsec_notes": [
+        "Target readiness only; source coercion and credential context are not validated."
+      ],
+      "score": 68.0,
+      "source": "jump01.redteamnotes.com",
+      "status": "candidate",
+      "summary": "SMB signing is not required and the modeled source can reach the file server segment.",
+      "target": "filesrv01.redteamnotes.com",
+      "target_service": "SMB/445",
+      "transport": "SMB"
+    },
+    {
+      "blockers": [
+        "LDAP signing policy remains conservative without a calibrated lab baseline."
+      ],
+      "confidence": "medium",
+      "evidence": [
+        {
+          "confidence": "medium",
+          "detail": "Modeled source capability used for this path.",
+          "key": "source_capability",
+          "raw": {},
+          "type": "inferred",
+          "value": "webclient"
+        },
+        {
+          "confidence": "high",
+          "detail": "LDAP SASL NTLM Type2 challenge was observed.",
+          "key": "ldap_sasl_ntlm_type2_challenge",
+          "raw": {},
+          "type": "observed",
+          "value": true
+        },
+        {
+          "confidence": "medium",
+          "detail": "Controls that reduce this path.",
+          "key": "relayx_controls",
+          "raw": {},
+          "type": "inferred",
+          "value": [
+            "ldap_signing",
+            "credential_boundary",
+            "ntlm_restriction"
+          ]
+        },
+        {
+          "confidence": "medium",
+          "detail": "Synthetic LDAP rejection is preserved as a conservative protocol classification.",
+          "key": "relayx_response_classification",
+          "raw": {},
+          "type": "inferred",
+          "value": "synthetic_auth_rejected"
+        },
+        {
+          "confidence": "medium",
+          "detail": "LDAP signing policy remains unproven for this path.",
+          "key": "relayx_policy_inference",
+          "raw": {},
+          "type": "inferred",
+          "value": "ldap_signing_not_proven"
+        },
+        {
+          "confidence": "medium",
+          "detail": "The path requires a signing-policy baseline before promotion.",
+          "key": "relayx_remaining_uncertainty",
+          "raw": {},
+          "type": "inferred",
+          "value": [
+            "LDAP Type2 evidence proves negotiation, not signing policy.",
+            "Use lab calibration or policy review before treating the path as relayable."
+          ]
+        }
+      ],
+      "fixes": [
+        "Require LDAP signing on domain controllers.",
+        "Restrict NTLM where feasible."
+      ],
+      "id": "PX-0003",
+      "impact": "medium",
+      "opsec_notes": [
+        "Treat LDAP relayability as theoretical until signing policy is calibrated."
+      ],
+      "score": 47.0,
+      "source": "jump01.redteamnotes.com",
+      "status": "candidate",
+      "summary": "LDAP NTLM negotiation is visible, but signing enforcement remains uncertain.",
+      "target": "dc01.redteamnotes.com",
+      "target_service": "LDAP/389",
+      "transport": "LDAP"
+    },
+    {
+      "blockers": [
+        "MSSQL EPA enforcement requires lab baseline comparison."
+      ],
+      "confidence": "medium",
+      "evidence": [
+        {
+          "confidence": "medium",
+          "detail": "Modeled source capability used for this path.",
+          "key": "source_capability",
+          "raw": {},
+          "type": "inferred",
+          "value": "mssql_outbound"
+        },
+        {
+          "confidence": "high",
+          "detail": "TDS-wrapped TLS completed.",
+          "key": "tds_wrapped_tls",
+          "raw": {},
+          "type": "observed",
+          "value": true
+        },
+        {
+          "confidence": "high",
+          "detail": "MSSQL SSPI NTLM Type2 challenge was observed.",
+          "key": "mssql_sspi_ntlm_type2_challenge",
+          "raw": {},
+          "type": "observed",
+          "value": true
+        },
+        {
+          "confidence": "medium",
+          "detail": "Synthetic MSSQL authentication was rejected in the tutorial fixture.",
+          "key": "relayx_response_classification",
+          "raw": {},
+          "type": "inferred",
+          "value": "synthetic_auth_rejected"
+        },
+        {
+          "confidence": "medium",
+          "detail": "MSSQL EPA enforcement remains unproven for this path.",
+          "key": "relayx_policy_inference",
+          "raw": {},
+          "type": "inferred",
+          "value": "mssql_epa_not_proven"
+        },
+        {
+          "confidence": "medium",
+          "detail": "CBT material exists, but the EPA state needs baseline comparison.",
+          "key": "relayx_remaining_uncertainty",
+          "raw": {},
+          "type": "inferred",
+          "value": [
+            "TDS-wrapped TLS and CBT evidence do not prove EPA enforcement.",
+            "Compare against SQL Server EPA-required and EPA-disabled lab captures."
+          ]
+        },
+        {
+          "confidence": "medium",
+          "detail": "Controls that reduce this path.",
+          "key": "relayx_controls",
+          "raw": {},
+          "type": "inferred",
+          "value": [
+            "mssql_epa",
+            "mssql_service_account_hardening",
+            "outbound_auth_egress"
+          ]
+        },
+        {
+          "confidence": "medium",
+          "detail": "Higher-risk route metadata from the SQL-adjacent source.",
+          "key": "route_risk_level",
+          "raw": {},
+          "type": "inferred",
+          "value": "high"
+        }
+      ],
+      "fixes": [
+        "Require encryption and EPA for SQL Server endpoints.",
+        "Review SQL Server service account exposure and outbound authentication."
+      ],
+      "id": "PX-0004",
+      "impact": "high",
+      "opsec_notes": [
+        "MSSQL outbound-auth paths should be validated in lab before any active source trigger."
+      ],
+      "score": 74.0,
+      "source": "sqlagent01.redteamnotes.com",
+      "status": "candidate",
+      "summary": "MSSQL NTLM challenge and TLS CBT evidence were observed, but EPA enforcement remains conservative.",
+      "target": "sql01.redteamnotes.com",
+      "target_service": "MSSQL/1433",
+      "transport": "MSSQL/NTLM"
+    },
+    {
+      "blockers": [
+        "Route metadata does not reach the LDAPS target segment."
+      ],
+      "confidence": "medium",
+      "evidence": [
+        {
+          "confidence": "medium",
+          "detail": "Modeled route says this target is unreachable.",
+          "key": "route_reachable",
+          "raw": {},
+          "type": "inferred",
+          "value": false
+        },
+        {
+          "confidence": "medium",
+          "detail": "Route reachability state from route_hops.",
+          "key": "route_reachability_state",
+          "raw": {},
+          "type": "inferred",
+          "value": "unreachable"
+        },
+        {
+          "confidence": "medium",
+          "detail": "Controls that reduce this path.",
+          "key": "relayx_controls",
+          "raw": {},
+          "type": "inferred",
+          "value": [
+            "ldap_channel_binding",
+            "credential_boundary"
+          ]
+        }
+      ],
+      "fixes": [
+        "Require LDAP channel binding where supported.",
+        "Review LDAPS exposure by segment."
+      ],
+      "id": "PX-0005",
+      "impact": "medium",
+      "opsec_notes": [
+        "Blocked by modeled route awareness; no active route check was performed."
+      ],
+      "score": 0.0,
+      "source": "sqlagent01.redteamnotes.com",
+      "status": "blocked",
+      "summary": "LDAPS CBT evidence exists, but the modeled route blocks this path.",
+      "target": "dc01.redteamnotes.com",
+      "target_service": "LDAPS/636",
+      "transport": "LDAPS"
+    }
+  ],
+  "sources": [
+    {
+      "capabilities": {
+        "mssql_outbound": false,
+        "name_resolution": false,
+        "spooler": true,
+        "webclient": true
+      },
+      "host": "jump01.redteamnotes.com",
+      "noise_limit": "medium",
+      "notes": [
+        "Represents an already authorized operator session for offline path modeling."
+      ],
+      "route_hops": [
+        {
+          "id": "hop-ligolo-1",
+          "kind": "ligolo",
+          "name": "ligolo-jump01",
+          "noise": "low",
+          "notes": [
+            "Tutorial metadata only; RelayX does not open this pivot session."
+          ],
+          "requires_listener": false,
+          "risk_level": "medium",
+          "subnets": [
+            "10.20.0.0/16",
+            "10.30.0.0/16"
+          ]
+        }
+      ],
+      "routes": [],
+      "segment": "workstations",
+      "session": "ligolo-jump01",
+      "subnets": [
+        "10.20.0.0/16"
+      ],
+      "tags": [
+        "workstation",
+        "tier1",
+        "tutorial"
+      ]
+    },
+    {
+      "capabilities": {
+        "mssql_outbound": true,
+        "name_resolution": false,
+        "spooler": false,
+        "webclient": false
+      },
+      "host": "sqlagent01.redteamnotes.com",
+      "noise_limit": "medium",
+      "notes": [
+        "Represents a SQL-adjacent source for outbound-auth planning examples."
+      ],
+      "route_hops": [
+        {
+          "id": "hop-sliver-1",
+          "kind": "sliver_p2p",
+          "name": "sliver-sqlagent01",
+          "noise": "medium",
+          "notes": [
+            "Higher-risk route metadata used to demonstrate route risk scoring."
+          ],
+          "requires_listener": true,
+          "risk_level": "high",
+          "subnets": [
+            "10.40.0.0/16"
+          ]
+        }
+      ],
+      "routes": [],
+      "segment": "database",
+      "session": "sliver-sqlagent01",
+      "subnets": [
+        "10.40.0.0/16"
+      ],
+      "tags": [
+        "sql",
+        "tier1",
+        "tutorial"
+      ]
+    }
+  ]
+}
