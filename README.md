@@ -31,7 +31,7 @@ synthetic authentication validation is explicit and may create failed-logon
 telemetry.
 
 <p align="center">
-  <img src="docs/assets/RelayX-SSBlock.png" alt="RelayX CLI help screenshot" width="100%">
+  <img src="docs/assets/RelayX-SS.png" alt="RelayX CLI help screenshot" width="100%">
 </p>
 
 ## Capabilities
